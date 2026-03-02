@@ -1,0 +1,21 @@
+**AERIS Backend**
+
+AERIS Backend is the data aggregation and environmental intelligence engine that powers the AERIS platform.
+It is responsible for collecting environmental data from external sources, processing it into meaningful indicators, and delivering unified environmental insights through a structured API.
+
+The backend handles the core logic of the system, including environmental scoring, recommendation generation, caching strategies, and normalization of heterogeneous environmental datasets such as air quality, weather conditions, geographic features, and infrastructure density.
+
+This repository focuses on building a clean, modular, and scalable service architecture designed to support real-time environmental insight delivery while remaining efficient with external API usage.
+
+Core responsibilities of this repository include:
+
+* Aggregating environmental data from multiple external providers
+* Computing unified environmental health scores
+* Estimating contextual risks such as heat stress, flooding potential, and noise exposure
+* Generating human-readable daily recommendations
+* Providing REST API endpoints for frontend consumption
+* Implementing caching and rate-limit-aware data fetching
+
+The backend is designed with extensibility in mind, allowing additional environmental indicators, predictive models, and localized datasets to be integrated in future iterations of AERIS.
+
+This repository represents the environmental intelligence layer of the platform, enabling the frontend to translate complex environmental signals into simple, actionable insights for users.
