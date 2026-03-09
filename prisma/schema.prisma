@@ -7,27 +7,47 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Post {
-  id         String   @id @default(uuid())
-  title      String   @db.VarChar(255)
-  content    String?
-  created_at DateTime @default(now())
 
-  @@map("posts")
-}
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  fullName  String
-  password  String
-  token     String?
-  role      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  otp       String?
-  expOtp    DateTime?
-  isVerify  Boolean?
+  id                   String                @id @default(uuid())
+  email                String?               @unique
+  phone                String?               @unique
+  fullName             String
+  password             String?
+  role                 RoleType
+  isVerify             Boolean               @default(false)
+  otp                  String?
+  expOtp               DateTime?
+  token                String?
+  activateExp          DateTime?
+  activateToken        String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  avaUrl               String?
+  session              UserSession[]
 
-  @@map("User")
+  @@map("users")
+}
+
+
+model UserSession {
+  id        String   @id @default(uuid())
+  userId    String
+  userAgent String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  ipAddress String
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("user_sessions")
+}
+
+
+enum RoleType {
+  PARENT
+  KADER
+  POSYANDU
+  ADMIN
 }
