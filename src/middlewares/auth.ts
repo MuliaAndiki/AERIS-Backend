@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import { JwtPayload } from "../types/auth.types";
-import { env } from "@/config/env.config";
+import { JwtPayload } from "@/modules/auth/auth.types";
+import { env } from "@/config/env";
 
 export const verifyToken = () => ({
   beforeHandle: async (c: any) => {

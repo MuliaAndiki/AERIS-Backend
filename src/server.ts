@@ -1,6 +1,6 @@
 import app from "./app";
-import { connectWithRetry } from "./config/databases";
-import { env } from "./config/env.config";
+import { connectPrismaWithRetry } from "./config/prisma";
+import { env } from "./config/env";
 import { initSocket } from "./utils/socket";
 const port = Number.isFinite(env.PORT) ? env.PORT : 5000;
 
@@ -10,7 +10,7 @@ app.onStart(() => {
 
 async function connected() {
   try {
-    await connectWithRetry();
+    await connectPrismaWithRetry();
     await initSocket();
 
     app.listen({
@@ -18,7 +18,7 @@ async function connected() {
       hostname: "0.0.0.0",
     });
   } catch (error) {
-    console.error("❌ Could not connect to database after retries:", error);
+    console.error(" Could not connect to database after retries:", error);
     process.exit(1);
   }
 }

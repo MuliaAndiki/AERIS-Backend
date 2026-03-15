@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { env } from "@/config/env.config";
+import { env } from "@/config/env";
 
 export const sendOTPEmail = async (to: string, otp: string) => {
   const transporter = nodemailer.createTransport({

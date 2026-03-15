@@ -3,33 +3,32 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-
-
 model User {
-  id                   String                @id @default(uuid())
-  email                String?               @unique
-  phone                String?               @unique
-  fullName             String
-  password             String?
-  role                 RoleType
-  isVerify             Boolean               @default(false)
-  otp                  String?
-  expOtp               DateTime?
-  token                String?
-  activateExp          DateTime?
-  activateToken        String?
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  avaUrl               String?
-  session              UserSession[]
+  id            String         @id @default(uuid())
+  email         String?        @unique
+  phone         String?        @unique
+  fullName      String
+  password      String?
+  role          RoleType
+  isVerify      Boolean        @default(false)
+  otp           String?
+  expOtp        DateTime?
+  token         String?
+  activateExp   DateTime?
+  activateToken String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  avaUrl        String?
+  location      UserLocation[]
+  session       UserSession[]
 
   @@map("users")
 }
-
 
 model UserSession {
   id        String   @id @default(uuid())
@@ -44,10 +43,138 @@ model UserSession {
   @@map("user_sessions")
 }
 
+model UserLocation {
+  id        String                  @id @default(uuid())
+  userId    String
+  latitude  Float
+  longitude Float
+  city      String
+  country   String
+  createdAt DateTime                @default(now())
+  snapshots EnvironmentalSnapshot[]
+  user      User                    @relation(fields: [userId], references: [id])
+
+  @@map("user_locations")
+}
+
+model EnvironmentalSnapshot {
+  id                 String                    @id @default(uuid())
+  locationId         String
+  snapshotTime       DateTime
+  environmentalScore Int
+  airQuality         AirQuality?
+  scoreDetail        EnvironmentalScoreDetail?
+  location           UserLocation              @relation(fields: [locationId], references: [id])
+  greenAccessScores  GreenAccessScore[]
+  noiseEstimation    NoiseEstimation?
+  recommendations    Recommendation[]
+  weatherCondition   WeatherCondition?
+
+  @@map("environmental_snapshots")
+}
+
+model AirQuality {
+  id                String                @id @default(uuid())
+  snapshotId        String                @unique
+  aqi               Int
+  category          String
+  dominantPollutant String
+  snapshot          EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+
+  @@map("air_quality")
+}
+
+model WeatherCondition {
+  id            String                @id @default(uuid())
+  snapshotId    String                @unique
+  temperature   Float
+  humidity      Float
+  rainfall      Float
+  weatherStatus String
+  snapshot      EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+
+  @@map("weather_conditions")
+}
+
+model NoiseEstimation {
+  id                  String                @id @default(uuid())
+  snapshotId          String                @unique
+  roadDensityIndex    Int
+  estimatedNoiseLevel Int
+  snapshot            EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+
+  @@map("noise_estimations")
+}
+
+model EnvironmentalScoreDetail {
+  id              String                @id @default(uuid())
+  snapshotId      String                @unique
+  airQualityScore Int
+  heatRiskScore   Int
+  floodRiskScore  Int
+  noiseScore      Int
+  greenSpaceScore Int
+  snapshot        EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+
+  @@map("environmental_score_details")
+}
+
+model Recommendation {
+  id                 String                @id @default(uuid())
+  snapshotId         String
+  recommendationType String
+  message            String
+  severity           Int
+  snapshot           EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+
+  @@map("recommendations")
+}
+
+model GreenArea {
+  id           String             @id @default(uuid())
+  name         String
+  latitude     Float
+  longitude    Float
+  areaSize     Float
+  accessScores GreenAccessScore[]
+
+  @@map("green_areas")
+}
+
+model GreenAccessScore {
+  id                 String                @id @default(uuid())
+  snapshotId         String
+  greenAreaId        String
+  distanceKm         Float
+  accessibilityScore Int
+  greenArea          GreenArea             @relation(fields: [greenAreaId], references: [id])
+  snapshot           EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+
+  @@map("green_access_scores")
+}
+
+model ApiProvider {
+  id           String         @id @default(uuid())
+  name         String
+  providerType String
+  baseUrl      String
+  fetchLogs    DataFetchLog[]
+
+  @@map("api_providers")
+}
+
+model DataFetchLog {
+  id              String      @id @default(uuid())
+  providerId      String
+  fetchTime       DateTime
+  status          String
+  responseSummary String?
+  provider        ApiProvider @relation(fields: [providerId], references: [id])
+
+  @@map("data_fetch_logs")
+}
 
 enum RoleType {
-  PARENT
-  KADER
-  POSYANDU
+  USER
   ADMIN
 }
