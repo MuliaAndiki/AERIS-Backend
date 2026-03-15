@@ -1,14 +1,16 @@
-FROM oven/bun:1.1.45 AS build
+FROM oven/bun:1.1-slim
 
 WORKDIR /app
 
 COPY package.json ./
+COPY prisma ./prisma/
+
 RUN bun install
+RUN bun prisma generate
 
 COPY . .
 
-RUN bunx prisma generate
+EXPOSE 3001
 
-EXPOSE 5000
 
-CMD ["bun", "run", "src/serve.ts"]
+CMD ["bun", "run", "start"]
