@@ -1,0 +1,1 @@
+Noise domain module placeholder.

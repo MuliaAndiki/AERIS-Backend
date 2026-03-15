@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
+  DIRECT_URL: z.string().url(),
   NODE_ENV: z.string(),
   PORT: z.string(),
   JWT_SECRET: z.string(),
@@ -14,6 +15,7 @@ const envSchema = z.object({
   SMTP_USER: z.string(),
   SMTP_PASS: z.string(),
   SMTP_SECURE: z.preprocess((val) => val === "true", z.boolean()),
+  SUPABASEPW: z.string(),
 });
 
 const _env = envSchema.safeParse(process.env);

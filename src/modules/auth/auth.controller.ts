@@ -9,7 +9,7 @@ import {
   PickVerify,
   PickSendOtp,
   PickResetPassword,
-} from "@/types/auth.types";
+} from "@/modules/auth/auth.types";
 import prisma from "prisma/client";
 import { AppContext } from "@/contex/appContex";
 import { generateOtp } from "@/utils/generateOtp";
@@ -65,7 +65,7 @@ class AuthController {
           data: {
             fullName: auth.fullName,
             password: hashedPassword,
-            role: auth.role || "PARENT",
+            role: auth.role || "USER",
             email: auth.email,
             phone: auth.phone,
             otp: otp,
@@ -89,7 +89,7 @@ class AuthController {
             fullName: auth.fullName,
             password: hashedPassword,
             phone: phone,
-            role: auth.role || "PARENT",
+            role: auth.role || "USER",
             isVerify: true,
           },
         });

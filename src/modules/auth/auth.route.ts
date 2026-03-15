@@ -1,5 +1,5 @@
 import Elysia from "elysia";
-import AuthController from "@/controllers/AuthController";
+import AuthController from "@/modules/auth/auth.controller";
 import { AppContext } from "@/contex/appContex";
 import { verifyToken } from "@/middlewares/auth";
 
