@@ -16,10 +16,9 @@ export interface Auth {
   isVerify?: boolean;
   activateToken?: string;
   activateExp?: string;
-  sessionId: string;
 }
 
-export type JwtPayload = Pick<Auth, "id" | "role" | "sessionId">;
+export type JwtPayload = Pick<Auth, "id" | "role">;
 export type PickRegister = Pick<
   Auth,
   "email" | "fullName" | "password" | "role" | "phone"

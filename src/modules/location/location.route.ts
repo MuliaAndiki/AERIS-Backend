@@ -7,7 +7,7 @@ class LocationRoutes {
   public router;
 
   constructor() {
-    this.router = new Elysia().derive(() => ({
+    this.router = new Elysia({ prefix: "/location" }).derive(() => ({
       json(data: unknown, status = 200) {
         return new Response(JSON.stringify(data), {
           status,
@@ -20,12 +20,10 @@ class LocationRoutes {
   }
 
   private routes() {
-    this.router.get("/location/detect", (c: AppContext) =>
-      locationController.detect(c),
-    );
+    this.router.get("/detect", (c: AppContext) => locationController.detect(c));
 
     this.router.post(
-      "/location/resolve",
+      "/resolve",
       (c: AppContext) => locationController.resolve(c),
       {
         beforeHandle: [verifyToken().beforeHandle],

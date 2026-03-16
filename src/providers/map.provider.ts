@@ -1,7 +1,8 @@
-export class MapProvider {
-  async reverseGeocode() {
-    throw new Error("MapProvider.reverseGeocode is not implemented yet");
-  }
+import WeatherProvider from "./env/weather.provider";
+import AirQualityProvider from "./env/air-quality.provider";
+class MapProvider {
+  weater = WeatherProvider;
+  airQuality = AirQualityProvider;
 }
 
 export default new MapProvider();

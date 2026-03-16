@@ -3,6 +3,7 @@ interface GeoLocation {
   longitude: number;
   city: string;
   country: string;
+  state: string;
 }
 
 interface RequestMeta {
@@ -28,7 +29,7 @@ export type DetectLocationResult = RequestMeta & {
 };
 
 type ResolveLocationPayload = Required<
-  Pick<GeoLocation, "latitude" | "longitude" | "city" | "country">
+  Pick<GeoLocation, "latitude" | "longitude" | "city" | "country" | "state">
 >;
 
 export type ResolveLocationBody = ResolveLocationPayload & {

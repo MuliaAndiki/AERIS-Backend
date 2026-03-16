@@ -50,6 +50,7 @@ model UserLocation {
   longitude Float
   city      String
   country   String
+  state String
   createdAt DateTime                @default(now())
   snapshots EnvironmentalSnapshot[]
   user      User                    @relation(fields: [userId], references: [id])

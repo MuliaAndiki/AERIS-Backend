@@ -7,7 +7,7 @@ class EnvironmentRoutes {
   public router;
 
   constructor() {
-    this.router = new Elysia().derive(() => ({
+    this.router = new Elysia({ prefix: "/environment" }).derive(() => ({
       json(data: unknown, status = 200) {
         return new Response(JSON.stringify(data), {
           status,
@@ -21,7 +21,7 @@ class EnvironmentRoutes {
 
   private routes() {
     this.router.get(
-      "/environment/raw",
+      "/raw",
       (c: AppContext) => environmentController.getRawEnvironment(c),
       {
         beforeHandle: [verifyToken().beforeHandle],
@@ -29,7 +29,7 @@ class EnvironmentRoutes {
     );
 
     this.router.get(
-      "/environment/providers",
+      "/providers",
       (c: AppContext) => environmentController.getProviders(c),
       {
         beforeHandle: [verifyToken().beforeHandle],
@@ -37,7 +37,7 @@ class EnvironmentRoutes {
     );
 
     this.router.get(
-      "/environment/providers/status",
+      "/providers/status",
       (c: AppContext) => environmentController.getProviderStatus(c),
       {
         beforeHandle: [verifyToken().beforeHandle],
