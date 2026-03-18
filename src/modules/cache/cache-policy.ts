@@ -1,0 +1,6 @@
+export const MODULE_CACHE_TTL = {
+  SNAPSHOT_MS: 10 * 60 * 1000,
+  SCORE_MS: 10 * 60 * 1000,
+  RECOMMENDATION_MS: 15 * 60 * 1000,
+  INSIGHT_MS: 15 * 60 * 1000,
+} as const;

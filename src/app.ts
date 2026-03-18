@@ -27,6 +27,13 @@ class App {
           },
           tags: [
             { name: "Auth", description: "Authentication endpoints" },
+            { name: "Snapshot", description: "Snapshot endpoints" },
+            { name: "Scoring", description: "Scoring endpoints" },
+            {
+              name: "Recommendation",
+              description: "Recommendation endpoints",
+            },
+            { name: "Insight", description: "Insight endpoints" },
             {
               name: "Environment",
               description: "Location and environmental data endpoints",
