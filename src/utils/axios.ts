@@ -44,14 +44,14 @@ export function AxiosEnvironment({
     },
   });
 
-  const floodRisk: AxiosInstance = axios.create({
-    baseURL: "#",
+  const disasterRisk: AxiosInstance = axios.create({
+    baseURL: "https://thinkhazard.org/en",
     timeout: 10000,
     timeoutErrorMessage: "floodRisk url Error",
   });
   const greenSpace: AxiosInstance = axios.create({
-    baseURL: "#",
-    timeout: 10000,
+    baseURL: "https://overpass-api.de/api",
+    timeout: 15000,
     timeoutErrorMessage: "greenSpace url Error",
   });
   const noise: AxiosInstance = axios.create({
@@ -59,5 +59,5 @@ export function AxiosEnvironment({
     timeout: 10000,
     timeoutErrorMessage: "noise url Error",
   });
-  return { airQuality, floodRisk, greenSpace, noise, weather };
+  return { airQuality, disasterRisk, greenSpace, noise, weather };
 }

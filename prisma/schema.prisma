@@ -9,21 +9,22 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  email         String?        @unique
-  phone         String?        @unique
+  id            String            @id @default(uuid())
+  email         String?           @unique
+  phone         String?           @unique
   fullName      String
   password      String?
   role          RoleType
-  isVerify      Boolean        @default(false)
+  isVerify      Boolean           @default(false)
   otp           String?
   expOtp        DateTime?
   token         String?
   activateExp   DateTime?
   activateToken String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
   avaUrl        String?
+  review        GreenAreaReview[]
   location      UserLocation[]
   session       UserSession[]
 
@@ -50,8 +51,9 @@ model UserLocation {
   longitude Float
   city      String
   country   String
-  state String
   createdAt DateTime                @default(now())
+  state     String
+  radius    Int
   snapshots EnvironmentalSnapshot[]
   user      User                    @relation(fields: [userId], references: [id])
 
@@ -138,6 +140,7 @@ model GreenArea {
   longitude    Float
   areaSize     Float
   accessScores GreenAccessScore[]
+  review       GreenAreaReview[]
 
   @@map("green_areas")
 }
@@ -152,6 +155,19 @@ model GreenAccessScore {
   snapshot           EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
 
   @@map("green_access_scores")
+}
+
+model GreenAreaReview {
+  id          String    @id @default(uuid())
+  rating      Int
+  greenAreaId String
+  userId      String
+  comment     String
+  createdAt   DateTime  @default(now())
+  greenArea   GreenArea @relation(fields: [greenAreaId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@map("green_review")
 }
 
 model ApiProvider {
