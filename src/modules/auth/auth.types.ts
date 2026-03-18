@@ -2,6 +2,7 @@ import { RoleType } from "@prisma/client";
 
 export interface Auth {
   id: string;
+  sessionId: string;
   email: string;
   fullName: string;
   password: string;
@@ -18,7 +19,7 @@ export interface Auth {
   activateExp?: string;
 }
 
-export type JwtPayload = Pick<Auth, "id" | "role">;
+export type JwtPayload = Pick<Auth, "id" | "role" | "sessionId">;
 export type PickRegister = Pick<
   Auth,
   "email" | "fullName" | "password" | "role" | "phone"
