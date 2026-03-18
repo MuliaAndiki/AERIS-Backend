@@ -5,3 +5,10 @@ export interface ScoreBreakdown {
   noiseScore: number;
   greenSpaceScore: number;
 }
+
+export type ScoreQuery = Partial<Record<"snapshotId", string>>;
+
+export interface ScoreSummary {
+  snapshotId: string;
+  environmentalScore: number;
+}
