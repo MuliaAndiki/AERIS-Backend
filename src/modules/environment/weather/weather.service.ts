@@ -2,6 +2,8 @@ import { AppContext } from "@/contex/appContex";
 import { HttpResponse, ErrorHandling } from "@/contex/error";
 import MapProvinder from "@/providers/map.provider";
 import prisma from "prisma/client";
+import { environmentCache } from "@/modules/environment/environment.cache";
+import { ENV_CACHE_TTL } from "@/modules/environment/environment.cache-policy";
 
 class WeatherService {
   public async getWeather(c: AppContext) {
@@ -12,7 +14,7 @@ class WeatherService {
 
       const locationQuery = await prisma.userLocation.findFirst({
         where: {
-          id: c.user?.id,
+          userId: c.user?.id,
         },
         select: {
           city: true,
@@ -29,10 +31,12 @@ class WeatherService {
 
       const { latitude, city, country, longitude, state } = locationQuery;
 
-      const weather = await MapProvinder.weater.getWeather(
-        latitude,
-        longitude,
-        c,
+      const cacheKey = ["weather", c.user.id, latitude, longitude].join(":");
+
+      const weather = await environmentCache.getOrSet(
+        cacheKey,
+        ENV_CACHE_TTL.WEATHER_MS,
+        () => MapProvinder.weater.getWeather(latitude, longitude, c),
       );
 
       if (!weather) {

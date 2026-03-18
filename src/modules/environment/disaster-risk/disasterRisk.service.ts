@@ -4,6 +4,8 @@ import MapProvinder from "@/providers/map.provider";
 import { hazardScoreMapping } from "@/types/harzard.type";
 import { AxiosEnvironment } from "@/utils/axios";
 import prisma from "prisma/client";
+import { environmentCache } from "@/modules/environment/environment.cache";
+import { ENV_CACHE_TTL } from "@/modules/environment/environment.cache-policy";
 
 class DisasterRiskService {
   public async getDisaster(c: AppContext) {
@@ -27,37 +29,53 @@ class DisasterRiskService {
 
       const { city } = userLocation;
 
-      const { disasterRisk } = AxiosEnvironment({
-        city: city,
-      });
+      const cacheKey = ["disaster-risk", c.user.id, city].join(":");
 
-      const divisionCode = await MapProvinder.disaster.getDisasterRisk(city, c);
+      const result = await environmentCache.getOrSet(
+        cacheKey,
+        ENV_CACHE_TTL.DISASTER_RISK_MS,
+        async () => {
+          const { disasterRisk } = AxiosEnvironment({
+            city: city,
+          });
 
-      if (!divisionCode) {
-        return HttpResponse(c).badRequest();
-      }
+          const divisionCode = await MapProvinder.disaster.getDisasterRisk(
+            city,
+            c,
+          );
 
-      const reportRes = await disasterRisk.get(`/report/${divisionCode}.json`);
+          if (!divisionCode) {
+            throw new Error("Invalid disaster division code");
+          }
 
-      if (!reportRes) {
-        return HttpResponse(c).badRequest();
-      }
+          const reportRes = await disasterRisk.get(
+            `/report/${divisionCode}.json`,
+          );
 
-      const hazards = reportRes.data;
+          if (!reportRes) {
+            throw new Error("Disaster report unavailable");
+          }
 
-      let floodScore = 0;
-      let heatScore = 0;
+          const hazards = reportRes.data;
 
-      hazards.forEach((hazard: any) => {
-        const level = hazard.hazardlevel.mnemonic;
-        const type = hazard.hazardtype.mnemonic;
+          let floodScore = 0;
+          let heatScore = 0;
 
-        const numericScore = hazardScoreMapping[level] || 0;
+          hazards.forEach((hazard: any) => {
+            const level = hazard.hazardlevel.mnemonic;
+            const type = hazard.hazardtype.mnemonic;
 
-        if (type === "FL" || type === "UF") floodScore = numericScore;
-        if (type === "EH") heatScore = numericScore;
-      });
-      return { floodScore, heatScore };
+            const numericScore = hazardScoreMapping[level] || 0;
+
+            if (type === "FL" || type === "UF") floodScore = numericScore;
+            if (type === "EH") heatScore = numericScore;
+          });
+
+          return { floodScore, heatScore };
+        },
+      );
+
+      return result;
     } catch (error) {
       return ErrorHandling(c, error);
     }
