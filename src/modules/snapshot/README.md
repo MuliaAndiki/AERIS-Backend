@@ -1,1 +1,0 @@
-Snapshot module placeholder.
