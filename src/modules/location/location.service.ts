@@ -52,7 +52,9 @@ class LocationService {
         latitude: Number(body.latitude),
         longitude: Number(body.longitude),
         city: body.city,
+        state: body.state,
         country: body.country,
+        radius: Number(body.radius),
       },
     });
   }
