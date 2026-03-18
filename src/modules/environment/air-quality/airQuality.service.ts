@@ -2,6 +2,8 @@ import { AppContext } from "@/contex/appContex";
 import { ErrorHandling, HttpResponse } from "@/contex/error";
 import prisma from "prisma/client";
 import MapProvinder from "@/providers/map.provider";
+import { environmentCache } from "@/modules/environment/environment.cache";
+import { ENV_CACHE_TTL } from "@/modules/environment/environment.cache-policy";
 class AirQualityService {
   public async getAirQuality(c: AppContext) {
     try {
@@ -27,13 +29,28 @@ class AirQualityService {
 
       const { latitude, city, country, state, longitude } = locationQuery;
 
-      const airQuality = await MapProvinder.airQuality.getAirQuality(
+      const cacheKey = [
+        "air-quality",
+        c.user.id,
         latitude,
         longitude,
         city,
-        country,
         state,
-        c,
+        country,
+      ].join(":");
+
+      const airQuality = await environmentCache.getOrSet(
+        cacheKey,
+        ENV_CACHE_TTL.AIR_QUALITY_MS,
+        () =>
+          MapProvinder.airQuality.getAirQuality(
+            latitude,
+            longitude,
+            city,
+            country,
+            state,
+            c,
+          ),
       );
 
       if (!airQuality) {

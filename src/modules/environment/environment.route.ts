@@ -1,5 +1,6 @@
 import Elysia from "elysia";
 import environmentController from "@/modules/environment/environment.controller";
+import environmentDataController from "@/modules/environment/environment-data.controller";
 import { AppContext } from "@/contex/appContex";
 import { verifyToken } from "@/middlewares/auth";
 
@@ -20,6 +21,38 @@ class EnvironmentRoutes {
   }
 
   private routes() {
+    this.router.get(
+      "/air-quality",
+      (c: AppContext) => environmentDataController.getAirQuality(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+      },
+    );
+
+    this.router.get(
+      "/weather",
+      (c: AppContext) => environmentDataController.getWeather(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+      },
+    );
+
+    this.router.get(
+      "/disaster-risk",
+      (c: AppContext) => environmentDataController.getDisasterRisk(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+      },
+    );
+
+    this.router.get(
+      "/green-space",
+      (c: AppContext) => environmentDataController.getGreenSpace(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+      },
+    );
+
     this.router.get(
       "/raw",
       (c: AppContext) => environmentController.getRawEnvironment(c),

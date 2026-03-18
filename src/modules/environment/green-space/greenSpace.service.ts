@@ -2,6 +2,8 @@ import { AppContext } from "@/contex/appContex";
 import { ErrorHandling, HttpResponse } from "@/contex/error";
 import prisma from "prisma/client";
 import MapProvinder from "@/providers/map.provider";
+import { environmentCache } from "@/modules/environment/environment.cache";
+import { ENV_CACHE_TTL } from "@/modules/environment/environment.cache-policy";
 
 class GreenSpaceService {
   public async getGreenSpace(c: AppContext) {
@@ -28,11 +30,19 @@ class GreenSpaceService {
 
       const { latitude, longitude, radius } = locationQuery;
 
-      const greenSpace = await MapProvinder.greenSpace.getGreenSpace(
+      const cacheKey = [
+        "green-space",
+        c.user.id,
         latitude,
         longitude,
         radius,
-        c,
+      ].join(":");
+
+      const greenSpace = await environmentCache.getOrSet(
+        cacheKey,
+        ENV_CACHE_TTL.GREEN_SPACE_MS,
+        () =>
+          MapProvinder.greenSpace.getGreenSpace(latitude, longitude, radius, c),
       );
 
       if (!greenSpace) {
