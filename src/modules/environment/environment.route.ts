@@ -1,4 +1,4 @@
-import Elysia from "elysia";
+import { Elysia, t } from "elysia";
 import environmentController from "@/modules/environment/environment.controller";
 import environmentDataController from "@/modules/environment/environment-data.controller";
 import { AppContext } from "@/contex/appContex";
@@ -26,6 +26,10 @@ class EnvironmentRoutes {
       (c: AppContext) => environmentDataController.getAirQuality(c),
       {
         beforeHandle: [verifyToken().beforeHandle],
+        detail: {
+          tags: ["Environment"],
+          summary: "Get current air quality",
+        },
       },
     );
 
@@ -34,6 +38,10 @@ class EnvironmentRoutes {
       (c: AppContext) => environmentDataController.getWeather(c),
       {
         beforeHandle: [verifyToken().beforeHandle],
+        detail: {
+          tags: ["Environment"],
+          summary: "Get current weather condition",
+        },
       },
     );
 
@@ -42,6 +50,10 @@ class EnvironmentRoutes {
       (c: AppContext) => environmentDataController.getDisasterRisk(c),
       {
         beforeHandle: [verifyToken().beforeHandle],
+        detail: {
+          tags: ["Environment"],
+          summary: "Get disaster risk score",
+        },
       },
     );
 
@@ -50,6 +62,10 @@ class EnvironmentRoutes {
       (c: AppContext) => environmentDataController.getGreenSpace(c),
       {
         beforeHandle: [verifyToken().beforeHandle],
+        detail: {
+          tags: ["Environment"],
+          summary: "Get nearby green space data",
+        },
       },
     );
 
@@ -58,6 +74,14 @@ class EnvironmentRoutes {
       (c: AppContext) => environmentController.getRawEnvironment(c),
       {
         beforeHandle: [verifyToken().beforeHandle],
+        query: t.Object({
+          locationId: t.Optional(t.String()),
+          userId: t.Optional(t.String()),
+        }),
+        detail: {
+          tags: ["Environment"],
+          summary: "Get raw aggregated environmental snapshot",
+        },
       },
     );
 
@@ -66,6 +90,10 @@ class EnvironmentRoutes {
       (c: AppContext) => environmentController.getProviders(c),
       {
         beforeHandle: [verifyToken().beforeHandle],
+        detail: {
+          tags: ["Environment"],
+          summary: "Get registered API providers",
+        },
       },
     );
 
@@ -74,6 +102,10 @@ class EnvironmentRoutes {
       (c: AppContext) => environmentController.getProviderStatus(c),
       {
         beforeHandle: [verifyToken().beforeHandle],
+        detail: {
+          tags: ["Environment"],
+          summary: "Get API provider statuses",
+        },
       },
     );
   }
