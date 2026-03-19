@@ -1,13 +1,13 @@
-import Elysia from "elysia";
+import { Elysia, t } from "elysia";
 import AuthController from "@/modules/auth/auth.controller";
 import { AppContext } from "@/contex/appContex";
 import { verifyToken } from "@/middlewares/auth";
 
-class AuthRouter {
-  public authRouter;
+class AuthRoute {
+  public router;
 
   constructor() {
-    this.authRouter = new Elysia({ prefix: "/auth" }).derive(() => ({
+    this.router = new Elysia({ prefix: "/auth" }).derive(() => ({
       json(data: any, status = 200) {
         return new Response(JSON.stringify(data), {
           status,
@@ -19,29 +19,103 @@ class AuthRouter {
   }
 
   private routes() {
-    this.authRouter.post("/login", (c: AppContext) => AuthController.login(c));
-    this.authRouter.post("/register", (c: AppContext) =>
-      AuthController.register(c),
-    );
-    this.authRouter.post(
-      "/logout",
-      (c: AppContext) => AuthController.logout(c),
+    this.router.post("/login", (c: AppContext) => AuthController.login(c), {
+      body: t.Object({
+        email: t.Optional(t.String({ format: "email" })),
+        phone: t.Optional(t.String()),
+        password: t.String(),
+      }),
+      detail: {
+        tags: ["Auth"],
+        summary: "Login with email or phone",
+      },
+    });
+
+    this.router.post(
+      "/register",
+      (c: AppContext) => AuthController.register(c),
       {
-        beforeHandle: [verifyToken().beforeHandle],
+        body: t.Object({
+          fullName: t.String(),
+          password: t.String(),
+          email: t.Optional(t.String({ format: "email" })),
+          phone: t.Optional(t.String()),
+          role: t.Optional(t.Union([t.Literal("USER"), t.Literal("ADMIN")])),
+        }),
+        detail: {
+          tags: ["Auth"],
+          summary: "Register user account",
+        },
       },
     );
-    this.authRouter.post("/forgot", (c: AppContext) =>
-      AuthController.forgotPassword(c),
+
+    this.router.post("/logout", (c: AppContext) => AuthController.logout(c), {
+      beforeHandle: [verifyToken().beforeHandle],
+      body: t.Optional(t.Object({})),
+      detail: {
+        tags: ["Auth"],
+        summary: "Logout current user",
+      },
+    });
+
+    this.router.post(
+      "/forgot",
+      (c: AppContext) => AuthController.forgotPassword(c),
+      {
+        body: t.Object({
+          email: t.Optional(t.String({ format: "email" })),
+          phone: t.Optional(t.String()),
+        }),
+        detail: {
+          tags: ["Auth"],
+          summary: "Request forgot password OTP",
+        },
+      },
     );
 
-    this.authRouter.post("/verifyOtp", (c: AppContext) =>
-      AuthController.verifyOtp(c),
+    this.router.post(
+      "/verifyOtp",
+      (c: AppContext) => AuthController.verifyOtp(c),
+      {
+        body: t.Object({
+          email: t.String({ format: "email" }),
+          otp: t.String(),
+        }),
+        detail: {
+          tags: ["Auth"],
+          summary: "Verify OTP code",
+        },
+      },
     );
-    this.authRouter.post("/resend", (c: AppContext) =>
-      AuthController.resendOtp(c),
+
+    this.router.post(
+      "/resend",
+      (c: AppContext) => AuthController.resendOtp(c),
+      {
+        body: t.Object({
+          email: t.String({ format: "email" }),
+        }),
+        detail: {
+          tags: ["Auth"],
+          summary: "Resend OTP code",
+        },
+      },
     );
-    this.authRouter.post("/reset-password", (c: AppContext) =>
-      AuthController.resetPassword(c),
+
+    this.router.post(
+      "/reset-password",
+      (c: AppContext) => AuthController.resetPassword(c),
+      {
+        body: t.Object({
+          email: t.Optional(t.String({ format: "email" })),
+          phone: t.Optional(t.String()),
+          password: t.String(),
+        }),
+        detail: {
+          tags: ["Auth"],
+          summary: "Reset user password",
+        },
+      },
     );
     // this.authRouter.post("/google-login", (c: AppContext) =>
     //   AuthController.LoginWithGoogle(c),
@@ -49,4 +123,4 @@ class AuthRouter {
   }
 }
 
-export default new AuthRouter().authRouter;
+export default new AuthRoute().router;
