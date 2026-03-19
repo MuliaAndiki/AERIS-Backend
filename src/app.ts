@@ -29,6 +29,7 @@ class App {
             { name: "Auth", description: "Authentication endpoints" },
             { name: "Snapshot", description: "Snapshot endpoints" },
             { name: "Scoring", description: "Scoring endpoints" },
+            { name: "Location", description: "Location endpoints" },
             {
               name: "Recommendation",
               description: "Recommendation endpoints",
