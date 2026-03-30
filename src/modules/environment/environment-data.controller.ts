@@ -3,6 +3,8 @@ import airQualityService from "@/modules/environment/air-quality/airQuality.serv
 import weatherService from "@/modules/environment/weather/weather.service";
 import disasterRiskService from "@/modules/environment/disaster-risk/disasterRisk.service";
 import greenSpaceService from "@/modules/environment/green-space/greenSpace.service";
+import heatRiskService from "@/modules/environment/heat-risk/heatRisk.service";
+import noiseService from "@/modules/environment/noise/noise.service";
 
 class EnvironmentDataController {
   public getAirQuality(c: AppContext) {
@@ -15,6 +17,14 @@ class EnvironmentDataController {
 
   public getDisasterRisk(c: AppContext) {
     return disasterRiskService.getDisaster(c);
+  }
+
+  public getHeatRisk(c: AppContext) {
+    return heatRiskService.getHeatRisk(c);
+  }
+
+  public getNoise(c: AppContext) {
+    return noiseService.getNoise(c);
   }
 
   public getGreenSpace(c: AppContext) {

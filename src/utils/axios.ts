@@ -39,7 +39,8 @@ export function AxiosEnvironment({
     params: {
       latitude: lat,
       longitude: lon,
-      current: "temperature_2m,relative_humidity_2m,weather_code",
+      current:
+        "temperature_2m,relative_humidity_2m,weather_code,apparent_temperature",
       timezone: "auto",
     },
   });
@@ -55,7 +56,7 @@ export function AxiosEnvironment({
     timeoutErrorMessage: "greenSpace url Error",
   });
   const noise: AxiosInstance = axios.create({
-    baseURL: "#",
+    baseURL: "https://overpass-api.de/api",
     timeout: 10000,
     timeoutErrorMessage: "noise url Error",
   });

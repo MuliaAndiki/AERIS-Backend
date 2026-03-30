@@ -46,6 +46,30 @@ class EnvironmentRoutes {
     );
 
     this.router.get(
+      "/heat-risk",
+      (c: AppContext) => environmentDataController.getHeatRisk(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+        detail: {
+          tags: ["Environment"],
+          summary: "Get heat risk score from apparent temperature",
+        },
+      },
+    );
+
+    this.router.get(
+      "/noise",
+      (c: AppContext) => environmentDataController.getNoise(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+        detail: {
+          tags: ["Environment"],
+          summary: "Estimate noise from major road density",
+        },
+      },
+    );
+
+    this.router.get(
       "/disaster-risk",
       (c: AppContext) => environmentDataController.getDisasterRisk(c),
       {
