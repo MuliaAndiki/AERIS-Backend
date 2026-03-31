@@ -89,6 +89,21 @@ class AuthRoute {
     );
 
     this.router.post(
+      "/verifyotp",
+      (c: AppContext) => AuthController.verifyOtp(c),
+      {
+        body: t.Object({
+          email: t.String({ format: "email" }),
+          otp: t.String(),
+        }),
+        detail: {
+          tags: ["Auth"],
+          summary: "Verify OTP code (lowercase alias)",
+        },
+      },
+    );
+
+    this.router.post(
       "/resend",
       (c: AppContext) => AuthController.resendOtp(c),
       {
