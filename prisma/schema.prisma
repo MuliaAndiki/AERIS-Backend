@@ -164,6 +164,10 @@ model GreenAreaReview {
   userId      String
   comment     String
   createdAt   DateTime  @default(now())
+  flagReason  String?
+  isFlagged   Boolean   @default(false)
+  isHidden    Boolean   @default(false)
+  updatedAt   DateTime  @updatedAt
   greenArea   GreenArea @relation(fields: [greenAreaId], references: [id])
   user        User      @relation(fields: [userId], references: [id])
 

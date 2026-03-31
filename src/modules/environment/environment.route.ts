@@ -2,7 +2,7 @@ import { Elysia, t } from "elysia";
 import environmentController from "@/modules/environment/environment.controller";
 import environmentDataController from "@/modules/environment/environment-data.controller";
 import { AppContext } from "@/contex/appContex";
-import { verifyToken } from "@/middlewares/auth";
+import { requireRole, verifyToken } from "@/middlewares/auth";
 
 class EnvironmentRoutes {
   public router;
@@ -89,6 +89,125 @@ class EnvironmentRoutes {
         detail: {
           tags: ["Environment"],
           summary: "Get nearby green space data",
+        },
+      },
+    );
+
+    this.router.get(
+      "/green-space/reviews",
+      (c: AppContext) => environmentDataController.getGreenSpaceReviews(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+        query: t.Object({
+          greenAreaId: t.String(),
+          page: t.Optional(t.String()),
+          limit: t.Optional(t.String()),
+          sort: t.Optional(
+            t.Union([t.Literal("latest"), t.Literal("top-rated")]),
+          ),
+          filter: t.Optional(
+            t.Union([
+              t.Literal("visible"),
+              t.Literal("all"),
+              t.Literal("flagged"),
+            ]),
+          ),
+        }),
+        detail: {
+          tags: ["Environment"],
+          summary: "Get green space reviews",
+        },
+      },
+    );
+
+    this.router.get(
+      "/green-space/:greenAreaId",
+      (c: AppContext) => environmentDataController.getGreenAreaDetail(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+        params: t.Object({
+          greenAreaId: t.String(),
+        }),
+        detail: {
+          tags: ["Environment"],
+          summary:
+            "Get green area detail with average rating and total reviews",
+        },
+      },
+    );
+
+    this.router.post(
+      "/green-space/reviews",
+      (c: AppContext) => environmentDataController.createGreenSpaceReview(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+        body: t.Object({
+          greenAreaId: t.String(),
+          rating: t.Number({ minimum: 1, maximum: 5 }),
+          comment: t.String(),
+        }),
+        detail: {
+          tags: ["Environment"],
+          summary: "Create green space review",
+        },
+      },
+    );
+
+    this.router.put(
+      "/green-space/reviews/:reviewId",
+      (c: AppContext) => environmentDataController.updateGreenSpaceReview(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+        params: t.Object({
+          reviewId: t.String(),
+        }),
+        body: t.Object({
+          rating: t.Optional(t.Number({ minimum: 1, maximum: 5 })),
+          comment: t.Optional(t.String()),
+          isFlagged: t.Optional(t.Boolean()),
+          flagReason: t.Optional(t.String()),
+        }),
+        detail: {
+          tags: ["Environment"],
+          summary: "Update green space review",
+        },
+      },
+    );
+
+    this.router.patch(
+      "/green-space/reviews/:reviewId/moderate",
+      (c: AppContext) => environmentDataController.moderateGreenSpaceReview(c),
+      {
+        beforeHandle: [
+          verifyToken().beforeHandle,
+          requireRole(["ADMIN"]).beforeHandle,
+        ],
+        params: t.Object({
+          reviewId: t.String(),
+        }),
+        body: t.Object({
+          isHidden: t.Optional(t.Boolean()),
+          isFlagged: t.Optional(t.Boolean()),
+          flagReason: t.Optional(t.String()),
+        }),
+        detail: {
+          tags: ["Environment"],
+          summary: "Moderate green space review",
+        },
+      },
+    );
+
+    this.router.delete(
+      "/green-space/reviews/:reviewId",
+      (c: AppContext) => environmentDataController.deleteGreenSpaceReview(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+        params: t.Object({
+          reviewId: t.String(),
+        }),
+        detail: {
+          tags: ["Environment"],
+          summary: "Delete green space review",
         },
       },
     );

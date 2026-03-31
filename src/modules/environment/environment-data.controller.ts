@@ -30,6 +30,30 @@ class EnvironmentDataController {
   public getGreenSpace(c: AppContext) {
     return greenSpaceService.getGreenSpace(c);
   }
+
+  public getGreenSpaceReviews(c: AppContext) {
+    return greenSpaceService.getGreenSpaceReviews(c);
+  }
+
+  public getGreenAreaDetail(c: AppContext) {
+    return greenSpaceService.getGreenAreaDetail(c);
+  }
+
+  public createGreenSpaceReview(c: AppContext) {
+    return greenSpaceService.createGreenSpaceReview(c);
+  }
+
+  public updateGreenSpaceReview(c: AppContext) {
+    return greenSpaceService.updateGreenSpaceReview(c);
+  }
+
+  public deleteGreenSpaceReview(c: AppContext) {
+    return greenSpaceService.deleteGreenSpaceReview(c);
+  }
+
+  public moderateGreenSpaceReview(c: AppContext) {
+    return greenSpaceService.moderateGreenSpaceReview(c);
+  }
 }
 
 export default new EnvironmentDataController();
