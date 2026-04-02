@@ -13,7 +13,7 @@ export const sendOTPEmail = async (to: string, otp: string) => {
   });
 
   const info = await transporter.sendMail({
-    from: `"NutriPlate" <${env.SMTP_USER}>`,
+    from: `"AERIS" <${env.SMTP_USER}>`,
     to,
     subject: "Kode OTP Verifikasi Akun Anda",
     text: `Kode OTP kamu adalah: ${otp}`,
