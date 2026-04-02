@@ -5,11 +5,9 @@ import app from "@/app";
 type EndpointCase = {
   method: string;
   path: string;
-  alternatePaths?: string[];
   body?: unknown;
   query?: Record<string, string>;
   authMode?: "none" | "invalid";
-  acceptableStatuses?: number[];
 };
 
 const endpointCases: EndpointCase[] = [
@@ -33,10 +31,8 @@ const endpointCases: EndpointCase[] = [
   },
   {
     method: "POST",
-    path: "/api/auth/verifyOtp",
-    alternatePaths: ["/api/auth/verifyotp", "/api/auth/verify-otp"],
-    body: { email: "a@a.com", otp: "123456" },
-    acceptableStatuses: [404, 422, 400, 500],
+    path: "/api/auth/verify-otp",
+    body: { email: "invalid-email", otp: "123456" },
   },
   {
     method: "POST",
@@ -207,31 +203,17 @@ describe("Endpoint Contract Coverage", () => {
       if (endpoint.authMode === "invalid")
         headers.set("Authorization", "Bearer invalid-token");
 
-      const pathsToTry = [endpoint.path, ...(endpoint.alternatePaths ?? [])];
-      let lastStatus = 404;
+      const request = new Request(buildUrl(endpoint.path, endpoint.query), {
+        method: endpoint.method,
+        headers,
+        body: endpoint.body ? JSON.stringify(endpoint.body) : undefined,
+      });
 
-      for (const path of pathsToTry) {
-        const request = new Request(buildUrl(path, endpoint.query), {
-          method: endpoint.method,
-          headers,
-          body: endpoint.body ? JSON.stringify(endpoint.body) : undefined,
-        });
+      const response = await app.handle(request);
+      const status = response.status;
 
-        const response = await app.handle(request);
-        lastStatus = response.status;
-
-        if (response.status !== 404 && response.status !== 405) {
-          break;
-        }
-      }
-
-      if (endpoint.acceptableStatuses?.length) {
-        expect(endpoint.acceptableStatuses.includes(lastStatus)).toBe(true);
-        return;
-      }
-
-      expect(lastStatus).not.toBe(404);
-      expect(lastStatus).not.toBe(405);
+      expect(status).not.toBe(404);
+      expect(status).not.toBe(405);
     });
   }
 });
