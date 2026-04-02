@@ -74,7 +74,7 @@ class AuthRoute {
     );
 
     this.router.post(
-      "/verifyOtp",
+      "/verify-otp",
       (c: AppContext) => AuthController.verifyOtp(c),
       {
         body: t.Object({
@@ -84,21 +84,6 @@ class AuthRoute {
         detail: {
           tags: ["Auth"],
           summary: "Verify OTP code",
-        },
-      },
-    );
-
-    this.router.post(
-      "/verifyotp",
-      (c: AppContext) => AuthController.verifyOtp(c),
-      {
-        body: t.Object({
-          email: t.String({ format: "email" }),
-          otp: t.String(),
-        }),
-        detail: {
-          tags: ["Auth"],
-          summary: "Verify OTP code (lowercase alias)",
         },
       },
     );
