@@ -14,7 +14,7 @@ type PendingLocationEntry = {
 
 const pendingLocationSaves = new Map<string, PendingLocationEntry>();
 
-function locationMatches(latest: any, body: ResolveLocationBody) {
+export function locationMatches(latest: any, body: ResolveLocationBody) {
   return (
     Number(latest.latitude) === Number(body.latitude) &&
     Number(latest.longitude) === Number(body.longitude) &&
