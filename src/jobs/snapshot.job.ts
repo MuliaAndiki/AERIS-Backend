@@ -207,10 +207,16 @@ async function refreshAllLocationCaches() {
   );
 }
 
+export function computeRetentionDate(days: number) {
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+}
+
+export function isOlderThanRetention(date: Date, retentionDate: Date) {
+  return date.getTime() < retentionDate.getTime();
+}
+
 async function cleanupOldSnapshots() {
-  const retentionDate = new Date(
-    Date.now() - SNAPSHOT_RETENTION_DAYS * 24 * 60 * 60 * 1000,
-  );
+  const retentionDate = computeRetentionDate(SNAPSHOT_RETENTION_DAYS);
 
   const staleSnapshots = await prisma.environmentalSnapshot.findMany({
     where: {
