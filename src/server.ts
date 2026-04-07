@@ -2,6 +2,7 @@ import app from "./app";
 import { connectPrismaWithRetry } from "./config/prisma";
 import { env } from "./config/env";
 import { initSocket } from "./utils/socket";
+import { runSnapshotJob } from "./jobs/snapshot.job";
 const port = Number.isFinite(env.PORT) ? env.PORT : 5000;
 
 app.onStart(() => {
@@ -12,6 +13,7 @@ async function connected() {
   try {
     await connectPrismaWithRetry();
     await initSocket();
+    runSnapshotJob();
 
     app.listen({
       port,
