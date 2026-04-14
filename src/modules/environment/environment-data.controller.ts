@@ -1,4 +1,4 @@
-import { AppContext } from "@/contex/appContex";
+import { AppContext } from "@/context/appContext";
 import airQualityService from "@/modules/environment/air-quality/airQuality.service";
 import weatherService from "@/modules/environment/weather/weather.service";
 import disasterRiskService from "@/modules/environment/disaster-risk/disasterRisk.service";

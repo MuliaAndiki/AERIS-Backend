@@ -1,13 +1,13 @@
 import WeatherProvider from "./env/weather.provider";
 import AirQualityProvider from "./env/air-quality.provider";
-import DisasterProvinder from "./env/disaster-risk.provinder";
-import GreenSpaceProvinder from "./env/green-space.provinder";
+import DisasterProvider from "./env/disaster-risk.provider";
+import GreenSpaceProvider from "./env/green-space.provider";
 import NoiseProvider from "./env/noise.provider";
 class MapProvider {
-  weater = WeatherProvider;
+  weather = WeatherProvider;
   airQuality = AirQualityProvider;
-  disaster = DisasterProvinder;
-  greenSpace = GreenSpaceProvinder;
+  disaster = DisasterProvider;
+  greenSpace = GreenSpaceProvider;
   noise = NoiseProvider;
 }
 

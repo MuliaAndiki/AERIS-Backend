@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import environmentController from "@/modules/environment/environment.controller";
 import environmentDataController from "@/modules/environment/environment-data.controller";
-import { AppContext } from "@/contex/appContex";
+import { AppContext } from "@/context/appContext";
 import { requireRole, verifyToken } from "@/middlewares/auth";
 
 class EnvironmentRoutes {

@@ -1,5 +1,5 @@
-import { AppContext } from "@/contex/appContex";
-import { HttpResponse, ErrorHandling } from "@/contex/error";
+import { AppContext } from "@/context/appContext";
+import { HttpResponse, ErrorHandling } from "@/context/error";
 import environmentService from "@/modules/environment/environment.service";
 import { RawEnvironmentQuery } from "@/modules/environment/environment.types";
 
