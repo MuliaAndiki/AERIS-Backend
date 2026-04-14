@@ -1,7 +1,7 @@
-import { AppContext } from "@/contex/appContex";
-import { ErrorHandling, HttpResponse } from "@/contex/error";
+import { AppContext } from "@/context/appContext";
+import { ErrorHandling, HttpResponse } from "@/context/error";
 import prisma from "prisma/client";
-import MapProvinder from "@/providers/map.provider";
+import MapProvider from "@/providers/map.provider";
 import { environmentCache } from "@/modules/environment/environment.cache";
 import { ENV_CACHE_TTL } from "@/modules/environment/environment.cache-policy";
 
@@ -19,6 +19,7 @@ class GreenSpaceService {
         where: {
           userId: c.user.id,
         },
+        orderBy: { createdAt: "desc" },
         select: {
           latitude: true,
           city: true,
@@ -33,6 +34,10 @@ class GreenSpaceService {
 
       const { latitude, longitude, radius } = locationQuery;
 
+      console.log(
+        `[GreenSpace] User location: lat=${latitude}, lon=${longitude}, radius=${radius}`,
+      );
+
       const cacheKey = [
         "green-space",
         c.user.id,
@@ -45,15 +50,19 @@ class GreenSpaceService {
         cacheKey,
         ENV_CACHE_TTL.GREEN_SPACE_MS,
         () =>
-          MapProvinder.greenSpace.getGreenSpace(latitude, longitude, radius, c),
+          MapProvider.greenSpace.getGreenSpace(latitude, longitude, radius, c),
+      );
+
+      console.log(
+        `[GreenSpace] API Response parkData count:`,
+        greenSpace?.parkData?.length ?? 0,
       );
 
       if (!greenSpace) {
-        return HttpResponse(c).badRequest();
-      }
-
-      if (greenSpace instanceof Response) {
-        return greenSpace;
+        console.warn(
+          `[GreenSpace Service] No data returned for user ${c.user.id}`,
+        );
+        return { greenAreas: [] };
       }
 
       const parkData = Array.isArray(greenSpace.parkData)

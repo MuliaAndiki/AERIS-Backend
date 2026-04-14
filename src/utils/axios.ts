@@ -52,12 +52,12 @@ export function AxiosEnvironment({
   });
   const greenSpace: AxiosInstance = axios.create({
     baseURL: "https://overpass-api.de/api",
-    timeout: 15000,
+    timeout: 30000,
     timeoutErrorMessage: "greenSpace url Error",
   });
   const noise: AxiosInstance = axios.create({
     baseURL: "https://overpass-api.de/api",
-    timeout: 10000,
+    timeout: 20000,
     timeoutErrorMessage: "noise url Error",
   });
   return { airQuality, disasterRisk, greenSpace, noise, weather };

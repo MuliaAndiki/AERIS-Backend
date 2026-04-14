@@ -1,5 +1,5 @@
 import { Elysia, t } from "elysia";
-import { AppContext } from "@/contex/appContex";
+import { AppContext } from "@/context/appContext";
 import { verifyToken } from "@/middlewares/auth";
 import insightController from "@/modules/insight/insight.controller";
 

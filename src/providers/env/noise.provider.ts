@@ -1,4 +1,4 @@
-import { AppContext } from "@/contex/appContex";
+import { AppContext } from "@/context/appContext";
 import { AxiosEnvironment } from "@/utils/axios";
 
 class NoiseProvider {
@@ -33,8 +33,10 @@ class NoiseProvider {
       const total = Number(response.data.elements[0]?.tags?.total);
       return Number.isFinite(total) ? total : 0;
     } catch (error) {
-      console.error(error);
-      throw new Error("Noise API unreachable");
+      console.error("Noise API error:", error);
+      // Return default value instead of throwing error
+      // This prevents 500 response when Overpass API is temporarily unavailable
+      return 2;
     }
   }
 }

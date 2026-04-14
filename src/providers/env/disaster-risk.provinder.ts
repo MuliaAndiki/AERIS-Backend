@@ -1,8 +1,8 @@
-import { AppContext } from "@/contex/appContex";
-import { ErrorHandling, HttpResponse } from "@/contex/error";
+import { AppContext } from "@/context/appContext";
+import { ErrorHandling, HttpResponse } from "@/context/error";
 import { AxiosEnvironment } from "@/utils/axios";
 
-class DisasterRiskProvinder {
+class DisasterRiskProvider {
   public async getDisasterRisk(cityName: string, c: AppContext) {
     try {
       const { disasterRisk } = AxiosEnvironment({
@@ -21,4 +21,4 @@ class DisasterRiskProvinder {
   }
 }
 
-export default new DisasterRiskProvinder();
+export default new DisasterRiskProvider();

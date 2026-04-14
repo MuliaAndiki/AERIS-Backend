@@ -1,9 +1,9 @@
 import prisma from "prisma/client";
-import MapProvinder from "@/providers/map.provider";
+import MapProvider from "@/providers/map.provider";
 import { AxiosEnvironment } from "@/utils/axios";
 import { environmentCache } from "@/modules/environment/environment.cache";
 import { ENV_CACHE_TTL } from "@/modules/environment/environment.cache-policy";
-import { hazardScoreMapping } from "@/types/harzard.type";
+import { hazardScoreMapping } from "@/types/hazard.type";
 
 const SNAPSHOT_JOB_INTERVAL_MS = 3 * 60 * 60 * 1000; // 3 hours
 const CLEANUP_JOB_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -65,7 +65,7 @@ export async function refreshLocationCache(location: {
 
   const tasks = [
     async () => {
-      const result = await MapProvinder.airQuality.getAirQuality(
+      const result = await MapProvider.airQuality.getAirQuality(
         latitude,
         longitude,
         city,
@@ -82,7 +82,7 @@ export async function refreshLocationCache(location: {
       }
     },
     async () => {
-      const result = await MapProvinder.weater.getWeather(
+      const result = await MapProvider.weather.getWeather(
         latitude,
         longitude,
         fakeContext,
@@ -92,7 +92,7 @@ export async function refreshLocationCache(location: {
       }
     },
     async () => {
-      const divisionCode = await MapProvinder.disaster.getDisasterRisk(
+      const divisionCode = await MapProvider.disaster.getDisasterRisk(
         city,
         fakeContext,
       );
@@ -123,7 +123,7 @@ export async function refreshLocationCache(location: {
       environmentCache.set(disasterKey, data, ENV_CACHE_TTL.DISASTER_RISK_MS);
     },
     async () => {
-      const result = await MapProvinder.noise.getMajorRoadCount(
+      const result = await MapProvider.noise.getMajorRoadCount(
         latitude,
         longitude,
         fakeContext,
@@ -133,7 +133,7 @@ export async function refreshLocationCache(location: {
       }
     },
     async () => {
-      const result = await MapProvinder.greenSpace.getGreenSpace(
+      const result = await MapProvider.greenSpace.getGreenSpace(
         latitude,
         longitude,
         radius,

@@ -1,5 +1,5 @@
-import { AppContext } from "@/contex/appContex";
-import { ErrorHandling, HttpResponse } from "@/contex/error";
+import { AppContext } from "@/context/appContext";
+import { ErrorHandling, HttpResponse } from "@/context/error";
 import recommendationService from "@/modules/recommendation/recommendation.service";
 import { RecommendationQuery } from "@/modules/recommendation/recommendation.types";
 

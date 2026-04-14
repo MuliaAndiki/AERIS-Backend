@@ -11,7 +11,7 @@ import {
   PickResetPassword,
 } from "@/modules/auth/auth.types";
 import prisma from "prisma/client";
-import { AppContext } from "@/contex/appContex";
+import { AppContext } from "@/context/appContext";
 import { generateOtp } from "@/utils/generateOtp";
 import { sendOTPEmail } from "@/utils/sendEmail";
 // import { OAuth2Client } from "google-auth-library";

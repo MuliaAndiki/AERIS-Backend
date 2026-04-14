@@ -1,7 +1,7 @@
-import { AppContext } from "@/contex/appContex";
-import { ErrorHandling, HttpResponse } from "@/contex/error";
+import { AppContext } from "@/context/appContext";
+import { ErrorHandling, HttpResponse } from "@/context/error";
 import prisma from "prisma/client";
-import MapProvinder from "@/providers/map.provider";
+import MapProvider from "@/providers/map.provider";
 import { environmentCache } from "@/modules/environment/environment.cache";
 import { ENV_CACHE_TTL } from "@/modules/environment/environment.cache-policy";
 class AirQualityService {
@@ -14,6 +14,9 @@ class AirQualityService {
       const locationQuery = await prisma.userLocation.findFirst({
         where: {
           userId: c.user?.id,
+        },
+        orderBy: {
+          createdAt: "desc", // Get LATEST location
         },
         select: {
           city: true,
@@ -29,6 +32,10 @@ class AirQualityService {
 
       const { latitude, city, country, state, longitude } = locationQuery;
 
+      console.log(
+        `[AirQuality] User location: city=${city}, lat=${latitude}, lon=${longitude}`,
+      );
+
       const cacheKey = [
         "air-quality",
         c.user.id,
@@ -43,7 +50,7 @@ class AirQualityService {
         cacheKey,
         ENV_CACHE_TTL.AIR_QUALITY_MS,
         () =>
-          MapProvinder.airQuality.getAirQuality(
+          MapProvider.airQuality.getAirQuality(
             latitude,
             longitude,
             city,
@@ -51,6 +58,11 @@ class AirQualityService {
             state,
             c,
           ),
+      );
+
+      console.log(
+        `[AirQuality] API Response:`,
+        JSON.stringify(airQuality).substring(0, 300),
       );
 
       if (!airQuality) {

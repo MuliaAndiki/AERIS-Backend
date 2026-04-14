@@ -22,7 +22,7 @@ class GreenSpaceProvider {
     try {
       const { greenSpace } = AxiosEnvironment({ lat, lon });
 
-      const respone = await greenSpace.post(
+      const response = await greenSpace.post(
         "/interpreter",
         `data=${encodeURIComponent(overpassQuery)}`,
         {
@@ -32,10 +32,13 @@ class GreenSpaceProvider {
         },
       );
 
-      if (!respone) {
-        return HttpResponse(c).badRequest();
+      if (!response || !response.data) {
+        console.warn(
+          `[GreenSpace] No response data from Overpass API at lat:${lat}, lon:${lon}`,
+        );
+        return { parkData: [] };
       }
-      const element = respone.data.elements;
+      const element = response.data.elements || [];
 
       const parkData = element.map((el: any) => {
         return {
@@ -53,7 +56,11 @@ class GreenSpaceProvider {
       });
       return { parkData };
     } catch (error) {
-      return ErrorHandling(c, error);
+      console.error(
+        `[GreenSpace] Error fetching from Overpass at (${lat}, ${lon}):`,
+        error instanceof Error ? error.message : error,
+      );
+      return { parkData: [] };
     }
   }
 }
