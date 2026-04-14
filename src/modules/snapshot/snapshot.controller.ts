@@ -1,5 +1,5 @@
-import { AppContext } from "@/contex/appContex";
-import { ErrorHandling, HttpResponse } from "@/contex/error";
+import { AppContext } from "@/context/appContext";
+import { ErrorHandling, HttpResponse } from "@/context/error";
 import snapshotService from "@/modules/snapshot/snapshot.service";
 import {
   GenerateSnapshotBody,

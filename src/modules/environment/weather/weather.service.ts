@@ -1,6 +1,6 @@
-import { AppContext } from "@/contex/appContex";
-import { HttpResponse, ErrorHandling } from "@/contex/error";
-import MapProvinder from "@/providers/map.provider";
+import { AppContext } from "@/context/appContext";
+import { HttpResponse, ErrorHandling } from "@/context/error";
+import MapProvider from "@/providers/map.provider";
 import prisma from "prisma/client";
 import { environmentCache } from "@/modules/environment/environment.cache";
 import { ENV_CACHE_TTL } from "@/modules/environment/environment.cache-policy";
@@ -36,7 +36,7 @@ class WeatherService {
       const weather = await environmentCache.getOrSet(
         cacheKey,
         ENV_CACHE_TTL.WEATHER_MS,
-        () => MapProvinder.weater.getWeather(latitude, longitude, c),
+        () => MapProvider.weather.getWeather(latitude, longitude, c),
       );
 
       if (!weather) {

@@ -1,7 +1,7 @@
-import { AppContext } from "@/contex/appContex";
-import { ErrorHandling, HttpResponse } from "@/contex/error";
+import { AppContext } from "@/context/appContext";
+import { ErrorHandling, HttpResponse } from "@/context/error";
 import { moduleCache } from "@/modules/cache/module-cache";
-import MapProvinder from "@/providers/map.provider";
+import MapProvider from "@/providers/map.provider";
 import prisma from "prisma/client";
 
 class HeatRiskService {
@@ -32,7 +32,7 @@ class HeatRiskService {
         return HttpResponse(c).badRequest("Location not found");
       }
 
-      const weatherData = await MapProvinder.weater.getWeather(
+      const weatherData = await MapProvider.weather.getWeather(
         userLocation.latitude,
         userLocation.longitude,
         c,

@@ -1,6 +1,6 @@
 import { AxiosEnvironment } from "@/utils/axios";
-import { HttpResponse, ErrorHandling } from "@/contex/error";
-import { AppContext } from "@/contex/appContex";
+import { AppContext } from "@/context/appContext";
+
 class AirQualityProvider {
   public async getAirQuality(
     lat: number,
@@ -11,22 +11,57 @@ class AirQualityProvider {
     c: AppContext,
   ) {
     try {
+      // Validate parameters - if any are empty/null, prioritize coordinates
+      const hasValidCity = city && typeof city === "string" && city.trim();
+      const hasValidState = state && typeof state === "string" && state.trim();
+      const hasValidCountry =
+        country && typeof country === "string" && country.trim();
+
+      // API Ninjas requires at least city+country or valid coordinates
+      if (!hasValidCity || !hasValidCountry) {
+        console.warn(
+          `[AirQuality] Invalid parameters detected. City: "${city}", Country: "${country}". Using coordinates only.`,
+        );
+        // Fallback: use coordinates without city parameters
+        const { airQuality } = AxiosEnvironment({
+          lat,
+          lon,
+        });
+        const response = await airQuality.get("/airquality");
+
+        if (!response) {
+          console.warn(
+            `[AirQuality] No response from API Ninjas at lat:${lat}, lon:${lon}`,
+          );
+          return { results: [{ aqi: 50 }] };
+        }
+        return response.data;
+      }
+
+      // Normal path: use city/country parameters
       const { airQuality } = AxiosEnvironment({
-        city,
-        country,
+        city: city.trim(),
+        country: country.trim(),
         lat,
         lon,
-        state,
+        state: hasValidState ? state.trim() : undefined,
       });
 
-      const respone = await airQuality.get("/airquality");
+      const response = await airQuality.get("/airquality");
 
-      if (!respone) {
-        return HttpResponse(c).badGateway();
+      if (!response) {
+        console.warn(
+          `[AirQuality] No response from API Ninjas at lat:${lat}, lon:${lon}`,
+        );
+        return { results: [{ aqi: 50 }] };
       }
-      return respone.data;
+      return response.data;
     } catch (error) {
-      return ErrorHandling(c, error);
+      console.error(
+        `[AirQuality] Error fetching from API Ninjas at (${lat}, ${lon}):`,
+        error instanceof Error ? error.message : error,
+      );
+      return { results: [{ aqi: 50 }] }; // Moderate air quality default on error
     }
   }
 }

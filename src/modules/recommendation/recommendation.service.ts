@@ -71,6 +71,54 @@ class RecommendationService {
           },
         });
 
+        // If no recommendations exist, generate fallback recommendations based on latest snapshot
+        if (recommendations.length === 0) {
+          const latestSnapshot = await prisma.environmentalSnapshot.findFirst({
+            where: {
+              location: {
+                userId,
+              },
+            },
+            orderBy: {
+              snapshotTime: "desc",
+            },
+            include: {
+              scoreDetail: true,
+            },
+          });
+
+          if (latestSnapshot?.scoreDetail) {
+            const detail = latestSnapshot.scoreDetail;
+            const score =
+              (detail.airQualityScore +
+                detail.heatRiskScore +
+                detail.floodRiskScore +
+                detail.noiseScore +
+                detail.greenSpaceScore) /
+              5;
+
+            const fallbackRecommendations = [
+              {
+                id: "fallback-1",
+                recommendationType: "general",
+                message:
+                  score > 70
+                    ? "Good environmental conditions today. Great time for outdoor activities!"
+                    : score > 50
+                      ? "Environmental conditions are moderate. Monitor changes throughout the day."
+                      : "Environmental conditions are poor today. Plan activities accordingly.",
+                severity: score > 70 ? 1 : score > 50 ? 2 : 3,
+              },
+            ];
+
+            return {
+              date: todayStart.toISOString().slice(0, 10),
+              total: fallbackRecommendations.length,
+              items: fallbackRecommendations as any,
+            };
+          }
+        }
+
         return {
           date: todayStart.toISOString().slice(0, 10),
           total: recommendations.length,

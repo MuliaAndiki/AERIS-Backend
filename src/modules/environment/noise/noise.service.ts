@@ -1,9 +1,9 @@
-import { AppContext } from "@/contex/appContex";
-import { ErrorHandling, HttpResponse } from "@/contex/error";
+import { AppContext } from "@/context/appContext";
+import { ErrorHandling, HttpResponse } from "@/context/error";
 import { environmentCache } from "@/modules/environment/environment.cache";
 import { ENV_CACHE_TTL } from "@/modules/environment/environment.cache-policy";
 import { moduleCache } from "@/modules/cache/module-cache";
-import MapProvinder from "@/providers/map.provider";
+import MapProvider from "@/providers/map.provider";
 import prisma from "prisma/client";
 
 class NoiseService {
@@ -45,7 +45,7 @@ class NoiseService {
         cacheKey,
         ENV_CACHE_TTL.NOISE_MS,
         () =>
-          MapProvinder.noise.getMajorRoadCount(
+          MapProvider.noise.getMajorRoadCount(
             userLocation.latitude,
             userLocation.longitude,
             c,

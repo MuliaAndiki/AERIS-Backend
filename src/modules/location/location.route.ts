@@ -1,5 +1,5 @@
 import { Elysia, t } from "elysia";
-import { AppContext } from "@/contex/appContex";
+import { AppContext } from "@/context/appContext";
 import { verifyToken } from "@/middlewares/auth";
 import locationController from "@/modules/location/location.controller";
 
@@ -33,6 +33,21 @@ class LocationRoutes {
         detail: {
           tags: ["Location"],
           summary: "Detect location from request and optional coordinates",
+        },
+      },
+    );
+
+    this.router.get(
+      "/search",
+      (c: AppContext) => locationController.search(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+        query: t.Object({
+          query: t.Optional(t.String()),
+        }),
+        detail: {
+          tags: ["Location"],
+          summary: "Search locations by query string",
         },
       },
     );
