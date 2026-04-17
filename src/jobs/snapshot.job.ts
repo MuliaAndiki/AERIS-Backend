@@ -4,6 +4,7 @@ import { AxiosEnvironment } from "@/utils/axios";
 import { environmentCache } from "@/modules/environment/environment.cache";
 import { ENV_CACHE_TTL } from "@/modules/environment/environment.cache-policy";
 import { hazardScoreMapping } from "@/types/hazard.type";
+import snapshotService from "@/modules/snapshot/snapshot.service";
 
 const SNAPSHOT_JOB_INTERVAL_MS = 3 * 60 * 60 * 1000; // 3 hours
 const CLEANUP_JOB_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -159,6 +160,19 @@ export async function refreshLocationCache(location: {
       }),
     ),
   );
+
+  // Generate a new snapshot from refreshed cache data
+  try {
+    await snapshotService.generate(userId, id);
+    console.log(
+      `[SnapshotJob] Generated snapshot for user ${userId} at location ${id}`,
+    );
+  } catch (error) {
+    console.error(
+      `[SnapshotJob] Failed to generate snapshot for user ${userId}:`,
+      error,
+    );
+  }
 }
 
 async function refreshAllLocationCaches() {

@@ -143,6 +143,7 @@ class RecommendationService {
         },
         include: {
           recommendations: true,
+          scoreDetail: true,
         },
       });
 
@@ -153,7 +154,7 @@ class RecommendationService {
       return byId;
     }
 
-    const latest = await prisma.environmentalSnapshot.findFirst({
+    let latest = await prisma.environmentalSnapshot.findFirst({
       where: {
         location: {
           userId,
@@ -164,11 +165,52 @@ class RecommendationService {
       },
       include: {
         recommendations: true,
+        scoreDetail: true,
       },
     });
 
+    // Auto-generate snapshot if none exists
     if (!latest) {
-      throw new Error("No snapshot found");
+      const location = await prisma.userLocation.findFirst({
+        where: {
+          userId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!location) {
+        throw new Error("No user location found");
+      }
+
+      latest = await prisma.environmentalSnapshot.create({
+        data: {
+          locationId: location.id,
+          snapshotTime: new Date(),
+          environmentalScore: 60,
+          scoreDetail: {
+            create: {
+              airQualityScore: 60,
+              heatRiskScore: 60,
+              floodRiskScore: 60,
+              noiseScore: 60,
+              greenSpaceScore: 60,
+            },
+          },
+        },
+        include: {
+          recommendations: true,
+          scoreDetail: true,
+        },
+      });
+
+      console.log(
+        `[RecommendationService] Auto-generated default snapshot ${latest.id} for user ${userId}`,
+      );
     }
 
     return latest;
