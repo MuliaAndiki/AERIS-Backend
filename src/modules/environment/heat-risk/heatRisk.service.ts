@@ -1,8 +1,12 @@
 import { AppContext } from "@/context/appContext";
 import { ErrorHandling, HttpResponse } from "@/context/error";
-import { moduleCache } from "@/modules/cache/module-cache";
 import MapProvider from "@/providers/map.provider";
 import prisma from "prisma/client";
+import {
+  getOrCreateLatestSnapshot,
+  refreshEnvironmentCache,
+  upsertScoreDetailAndUpdateSnapshot,
+} from "@/modules/environment/environment.persistence";
 
 class HeatRiskService {
   public async getHeatRisk(c: AppContext) {
@@ -66,75 +70,30 @@ class HeatRiskService {
         level = "Waspada";
       }
 
-      const latestSnapshot = await prisma.environmentalSnapshot.findFirst({
-        where: {
-          locationId: userLocation.id,
-        },
-        orderBy: {
-          snapshotTime: "desc",
-        },
-        select: {
-          id: true,
-        },
-      });
+      const snapshot = await getOrCreateLatestSnapshot(userLocation.id);
 
-      const snapshot =
-        latestSnapshot ??
-        (await prisma.environmentalSnapshot.create({
-          data: {
-            locationId: userLocation.id,
-            snapshotTime: new Date(),
-            environmentalScore: 60,
-          },
-          select: {
-            id: true,
-          },
-        }));
-
-      const scoreDetail = await prisma.environmentalScoreDetail.upsert({
+      await prisma.heatRisk.upsert({
         where: {
           snapshotId: snapshot.id,
         },
         create: {
           snapshotId: snapshot.id,
-          airQualityScore: 60,
+          feelsLike,
           heatRiskScore: heatScore,
-          floodRiskScore: 60,
-          noiseScore: 60,
-          greenSpaceScore: 60,
+          riskLevel: level,
         },
         update: {
+          feelsLike,
           heatRiskScore: heatScore,
-        },
-        select: {
-          airQualityScore: true,
-          heatRiskScore: true,
-          floodRiskScore: true,
-          noiseScore: true,
-          greenSpaceScore: true,
+          riskLevel: level,
         },
       });
 
-      const environmentalScore = Math.round(
-        (scoreDetail.airQualityScore +
-          scoreDetail.heatRiskScore +
-          scoreDetail.floodRiskScore +
-          scoreDetail.noiseScore +
-          scoreDetail.greenSpaceScore) /
-          5,
-      );
-
-      await prisma.environmentalSnapshot.update({
-        where: {
-          id: snapshot.id,
-        },
-        data: {
-          environmentalScore,
-        },
+      await upsertScoreDetailAndUpdateSnapshot(snapshot.id, {
+        heatRiskScore: heatScore,
       });
 
-      moduleCache.deleteByPrefix(`snapshot:${c.user.id}:`);
-      moduleCache.deleteByPrefix(`score:${c.user.id}:`);
+      refreshEnvironmentCache(c.user.id);
 
       return HttpResponse(c).ok({
         state: userLocation.state,

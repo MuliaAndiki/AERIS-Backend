@@ -6,6 +6,29 @@ import { AxiosEnvironment } from "@/utils/axios";
 import prisma from "prisma/client";
 import { environmentCache } from "@/modules/environment/environment.cache";
 import { ENV_CACHE_TTL } from "@/modules/environment/environment.cache-policy";
+import {
+  getOrCreateLatestSnapshot,
+  refreshEnvironmentCache,
+  upsertScoreDetailAndUpdateSnapshot,
+} from "@/modules/environment/environment.persistence";
+
+function clampScore(value: number) {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+// Use coordinates to produce a deterministic fallback when API data is missing.
+function getLocationBasedFloodRisk(lat: number, lon: number): number {
+  const seed = Math.abs(lat + lon);
+  const pseudoRandom = Math.sin(seed) * 10000;
+  const normalized = (pseudoRandom % 1) * 100;
+  const floodRisk = 15 + (normalized % 50);
+
+  console.log(
+    `[DisasterRisk] Generated location-based flood risk: ${floodRisk} (lat=${lat}, lon=${lon})`,
+  );
+
+  return Math.round(floodRisk);
+}
 
 class DisasterRiskService {
   public async getDisaster(c: AppContext) {
@@ -22,7 +45,9 @@ class DisasterRiskService {
           createdAt: "desc", // Get LATEST location
         },
         select: {
+          id: true,
           city: true,
+          country: true,
           latitude: true,
           longitude: true,
         },
@@ -40,22 +65,6 @@ class DisasterRiskService {
 
       const cacheKey = ["disaster-risk", c.user.id, city].join(":");
 
-      // Helper function to generate location-based default flood risk
-      const getLocationBasedFloodRisk = (lat: number, lon: number): number => {
-        // Use coordinates to create a pseudo-random but consistent value
-        // This ensures different locations get different values even if both APIs fail
-        const seed = Math.abs(lat + lon);
-        const pseudoRandom = Math.sin(seed) * 10000;
-        const normalized = (pseudoRandom % 1) * 100; // 0-100
-
-        // Map to a more realistic range (15-65 for flood risk)
-        const floodRisk = 15 + (normalized % 50);
-        console.log(
-          `[DisasterRisk] Generated location-based flood risk: ${floodRisk} (lat=${lat}, lon=${lon})`,
-        );
-        return Math.round(floodRisk);
-      };
-
       const result = await environmentCache.getOrSet(
         cacheKey,
         ENV_CACHE_TTL.DISASTER_RISK_MS,
@@ -66,6 +75,7 @@ class DisasterRiskService {
 
           const divisionCode = await MapProvider.disaster.getDisasterRisk(
             city,
+            userLocation.country,
             c,
             latitude,
             longitude,
@@ -79,7 +89,7 @@ class DisasterRiskService {
               `[DisasterRisk] No division code found for city: ${city}, returning location-based defaults`,
             );
             const floodScore = getLocationBasedFloodRisk(latitude, longitude);
-            return { floodScore, heatScore: 25 }; // Location-based flood risk, safe heat default
+            return { floodScore, heatScore: 25, divisionCode: null };
           }
 
           const reportRes = await disasterRisk.get(
@@ -91,7 +101,7 @@ class DisasterRiskService {
               `[DisasterRisk] No report data available for division code: ${divisionCode}`,
             );
             const floodScore = getLocationBasedFloodRisk(latitude, longitude);
-            return { floodScore, heatScore: 25 }; // Location-based flood risk, safe heat default
+            return { floodScore, heatScore: 25, divisionCode };
           }
 
           const hazards = reportRes.data;
@@ -109,11 +119,46 @@ class DisasterRiskService {
             if (type === "EH") heatScore = numericScore;
           });
 
-          return { floodScore, heatScore };
+          return { floodScore, heatScore, divisionCode };
         },
       );
 
-      return HttpResponse(c).ok(result);
+      const floodScore = clampScore(Number(result?.floodScore ?? 0));
+      const heatScore = clampScore(Number(result?.heatScore ?? 0));
+      const divisionCode =
+        typeof result?.divisionCode === "string" ? result.divisionCode : null;
+
+      const snapshot = await getOrCreateLatestSnapshot(userLocation.id);
+
+      await prisma.disasterRisk.upsert({
+        where: {
+          snapshotId: snapshot.id,
+        },
+        create: {
+          snapshotId: snapshot.id,
+          floodScore,
+          heatScore,
+          divisionCode,
+        },
+        update: {
+          floodScore,
+          heatScore,
+          divisionCode,
+        },
+      });
+
+      await upsertScoreDetailAndUpdateSnapshot(snapshot.id, {
+        floodRiskScore: floodScore,
+        ...(heatScore > 0 ? { heatRiskScore: heatScore } : {}),
+      });
+
+      refreshEnvironmentCache(c.user.id);
+
+      return HttpResponse(c).ok({
+        floodScore,
+        heatScore,
+        divisionCode,
+      });
     } catch (error) {
       return ErrorHandling(c, error);
     }

@@ -133,6 +133,8 @@ class SnapshotService {
           },
           include: {
             airQuality: true,
+            disasterRisk: true,
+            heatRisk: true,
             weatherCondition: true,
             noiseEstimation: true,
             scoreDetail: true,
@@ -210,6 +212,8 @@ class SnapshotService {
           },
           include: {
             airQuality: true,
+            disasterRisk: true,
+            heatRisk: true,
             weatherCondition: true,
             noiseEstimation: true,
             scoreDetail: true,
@@ -243,6 +247,8 @@ class SnapshotService {
       },
       include: {
         airQuality: true,
+        disasterRisk: true,
+        heatRisk: true,
         weatherCondition: true,
         noiseEstimation: true,
         scoreDetail: true,
@@ -274,6 +280,23 @@ class SnapshotService {
             aqi: latest?.airQuality?.aqi ?? 50,
             category: latest?.airQuality?.category ?? "Moderate",
             dominantPollutant: latest?.airQuality?.dominantPollutant ?? "pm2_5",
+          },
+        },
+        disasterRisk: {
+          create: {
+            floodScore: latest?.disasterRisk?.floodScore ?? floodRiskScore,
+            heatScore: latest?.disasterRisk?.heatScore ?? heatRiskScore,
+            divisionCode: latest?.disasterRisk?.divisionCode ?? null,
+          },
+        },
+        heatRisk: {
+          create: {
+            feelsLike:
+              latest?.heatRisk?.feelsLike ??
+              latest?.weatherCondition?.temperature ??
+              29,
+            heatRiskScore: latest?.heatRisk?.heatRiskScore ?? heatRiskScore,
+            riskLevel: latest?.heatRisk?.riskLevel ?? "Low Risk",
           },
         },
         weatherCondition: {
@@ -313,6 +336,8 @@ class SnapshotService {
       },
       include: {
         airQuality: true,
+        disasterRisk: true,
+        heatRisk: true,
         weatherCondition: true,
         noiseEstimation: true,
         scoreDetail: true,

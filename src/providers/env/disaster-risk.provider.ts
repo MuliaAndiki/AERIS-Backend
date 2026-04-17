@@ -5,27 +5,40 @@ import axios from "axios";
 class DisasterRiskProvider {
   public async getDisasterRisk(
     cityName: string,
-    c: AppContext,
+    country?: string,
+    c?: AppContext,
     lat?: number,
     lon?: number,
   ) {
     try {
+      const searchNames = [cityName];
+      if (country) {
+        searchNames.push(`${cityName}, ${country}`);
+      }
+
       const { disasterRisk } = AxiosEnvironment({
         city: cityName,
       });
 
       // Try lookup by city name first - handle 404 gracefully
       let divisionCode: string | undefined;
-      try {
-        let searchRes = await disasterRisk.get(`/search.json?q=${cityName}`);
-        divisionCode = searchRes.data[0]?.id;
-      } catch (searchError: any) {
-        if (searchError?.response?.status === 404) {
-          console.warn(
-            `[DisasterRisk] City "${cityName}" not found in ThinkHazard API (404)`,
+      for (const searchName of searchNames) {
+        try {
+          const searchRes = await disasterRisk.get(
+            `/search.json?q=${encodeURIComponent(searchName)}`,
           );
-        } else {
-          throw searchError;
+          divisionCode = searchRes.data[0]?.id;
+          if (divisionCode) {
+            break;
+          }
+        } catch (searchError: any) {
+          if (searchError?.response?.status === 404) {
+            console.warn(
+              `[DisasterRisk] City "${searchName}" not found in ThinkHazard API (404)`,
+            );
+          } else {
+            throw searchError;
+          }
         }
       }
 
@@ -58,16 +71,25 @@ class DisasterRiskProvider {
             console.info(
               `[DisasterRisk] Reverse geocoded: "${cityName}" → "${englishCity}"`,
             );
-            try {
-              const searchRes = await disasterRisk.get(
-                `/search.json?q=${englishCity}`,
-              );
-              divisionCode = searchRes.data[0]?.id;
-            } catch (reverseSearchError: any) {
-              if (reverseSearchError?.response?.status === 404) {
-                console.warn(
-                  `[DisasterRisk] Translated city "${englishCity}" also not found (404)`,
+            const reverseSearchNames = [englishCity];
+            if (country) {
+              reverseSearchNames.push(`${englishCity}, ${country}`);
+            }
+            for (const searchName of reverseSearchNames) {
+              try {
+                const searchRes = await disasterRisk.get(
+                  `/search.json?q=${encodeURIComponent(searchName)}`,
                 );
+                divisionCode = searchRes.data[0]?.id;
+                if (divisionCode) {
+                  break;
+                }
+              } catch (reverseSearchError: any) {
+                if (reverseSearchError?.response?.status === 404) {
+                  console.warn(
+                    `[DisasterRisk] Translated city "${searchName}" also not found (404)`,
+                  );
+                }
               }
             }
           }
