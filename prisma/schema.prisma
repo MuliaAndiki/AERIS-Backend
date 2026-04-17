@@ -66,6 +66,8 @@ model EnvironmentalSnapshot {
   snapshotTime       DateTime
   environmentalScore Int
   airQuality         AirQuality?
+  disasterRisk       DisasterRisk?
+  heatRisk           HeatRisk?
   scoreDetail        EnvironmentalScoreDetail?
   location           UserLocation              @relation(fields: [locationId], references: [id])
   greenAccessScores  GreenAccessScore[]
@@ -76,6 +78,7 @@ model EnvironmentalSnapshot {
   @@map("environmental_snapshots")
 }
 
+
 model AirQuality {
   id                String                @id @default(uuid())
   snapshotId        String                @unique
@@ -85,6 +88,28 @@ model AirQuality {
   snapshot          EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
 
   @@map("air_quality")
+}
+
+model DisasterRisk {
+  id           String                @id @default(uuid())
+  snapshotId   String                @unique
+  floodScore   Int
+  heatScore    Int
+  divisionCode String?
+  snapshot     EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+
+  @@map("disaster_risks")
+}
+
+model HeatRisk {
+  id            String                @id @default(uuid())
+  snapshotId    String                @unique
+  feelsLike     Float
+  heatRiskScore Int
+  riskLevel     String
+  snapshot      EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+
+  @@map("heat_risks")
 }
 
 model WeatherCondition {

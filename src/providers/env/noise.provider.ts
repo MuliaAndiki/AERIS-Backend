@@ -33,7 +33,11 @@ class NoiseProvider {
       const total = Number(response.data.elements[0]?.tags?.total);
       return Number.isFinite(total) ? total : 0;
     } catch (error) {
-      console.error("Noise API error:", error);
+      const message =
+        error instanceof Error ? error.message : "Unknown noise API error";
+      console.warn(
+        `[Noise] Overpass request failed for (${lat}, ${lon}): ${message}`,
+      );
       // Return default value instead of throwing error
       // This prevents 500 response when Overpass API is temporarily unavailable
       return 2;

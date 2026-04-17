@@ -243,6 +243,16 @@ async function cleanupOldSnapshots() {
           snapshotId: { in: snapshotIds },
         },
       }),
+      prisma.disasterRisk.deleteMany({
+        where: {
+          snapshotId: { in: snapshotIds },
+        },
+      }),
+      prisma.heatRisk.deleteMany({
+        where: {
+          snapshotId: { in: snapshotIds },
+        },
+      }),
       prisma.noiseEstimation.deleteMany({
         where: {
           snapshotId: { in: snapshotIds },
