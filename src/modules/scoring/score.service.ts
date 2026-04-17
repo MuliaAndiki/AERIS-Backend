@@ -79,7 +79,7 @@ export class ScoreService {
       return byId;
     }
 
-    const latest = await prisma.environmentalSnapshot.findFirst({
+    let latest = await prisma.environmentalSnapshot.findFirst({
       where: {
         location: {
           userId,
@@ -93,8 +93,48 @@ export class ScoreService {
       },
     });
 
+    // Auto-generate snapshot if none exists
     if (!latest) {
-      throw new Error("No snapshot found");
+      const location = await prisma.userLocation.findFirst({
+        where: {
+          userId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!location) {
+        throw new Error("No user location found");
+      }
+
+      // Create a default snapshot with baseline scores
+      latest = await prisma.environmentalSnapshot.create({
+        data: {
+          locationId: location.id,
+          snapshotTime: new Date(),
+          environmentalScore: 60,
+          scoreDetail: {
+            create: {
+              airQualityScore: 60,
+              heatRiskScore: 60,
+              floodRiskScore: 60,
+              noiseScore: 60,
+              greenSpaceScore: 60,
+            },
+          },
+        },
+        include: {
+          scoreDetail: true,
+        },
+      });
+
+      console.log(
+        `[ScoreService] Auto-generated default snapshot ${latest.id} for user ${userId}`,
+      );
     }
 
     return latest;
