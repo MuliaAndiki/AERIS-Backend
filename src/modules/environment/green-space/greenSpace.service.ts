@@ -4,9 +4,63 @@ import prisma from "prisma/client";
 import MapProvider from "@/providers/map.provider";
 import { environmentCache } from "@/modules/environment/environment.cache";
 import { ENV_CACHE_TTL } from "@/modules/environment/environment.cache-policy";
+import {
+  getOrCreateLatestSnapshot,
+  refreshEnvironmentCache,
+  upsertScoreDetailAndUpdateSnapshot,
+} from "@/modules/environment/environment.persistence";
 
 type ReviewSort = "latest" | "top-rated";
 type ReviewFilter = "visible" | "all" | "flagged";
+
+function toRadians(value: number) {
+  return (value * Math.PI) / 180;
+}
+
+function distanceInKm(
+  fromLat: number,
+  fromLon: number,
+  toLat: number,
+  toLon: number,
+) {
+  const earthRadiusKm = 6371;
+
+  const deltaLat = toRadians(toLat - fromLat);
+  const deltaLon = toRadians(toLon - fromLon);
+
+  const a =
+    Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+    Math.cos(toRadians(fromLat)) *
+      Math.cos(toRadians(toLat)) *
+      Math.sin(deltaLon / 2) *
+      Math.sin(deltaLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return earthRadiusKm * c;
+}
+
+function accessibilityScoreByDistance(
+  distanceKm: number,
+  radiusMeters: number,
+) {
+  const radiusKm = Math.max(radiusMeters / 1000, 0.1);
+  const ratio = Math.max(0, 1 - distanceKm / radiusKm);
+  return Math.max(0, Math.min(100, Math.round(ratio * 100)));
+}
+
+function aggregateGreenSpaceScore(accessibilityScores: number[]) {
+  if (!accessibilityScores.length) {
+    return 0;
+  }
+
+  const nearestTopFive = accessibilityScores
+    .slice()
+    .sort((left, right) => right - left)
+    .slice(0, 5);
+
+  const sum = nearestTopFive.reduce((acc, current) => acc + current, 0);
+  return Math.round(sum / nearestTopFive.length);
+}
 
 class GreenSpaceService {
   public async getGreenSpace(c: AppContext) {
@@ -21,6 +75,7 @@ class GreenSpaceService {
         },
         orderBy: { createdAt: "desc" },
         select: {
+          id: true,
           latitude: true,
           city: true,
           longitude: true,
@@ -62,11 +117,29 @@ class GreenSpaceService {
         console.warn(
           `[GreenSpace Service] No data returned for user ${c.user.id}`,
         );
+
+        const snapshot = await getOrCreateLatestSnapshot(locationQuery.id);
+        await prisma.greenAccessScore.deleteMany({
+          where: {
+            snapshotId: snapshot.id,
+          },
+        });
+        await upsertScoreDetailAndUpdateSnapshot(snapshot.id, {
+          greenSpaceScore: 0,
+        });
+        refreshEnvironmentCache(c.user.id);
+
         return { greenAreas: [] };
       }
 
       const parkData = Array.isArray(greenSpace.parkData)
-        ? greenSpace.parkData
+        ? greenSpace.parkData.filter((park: any) => {
+            const parkLatitude = Number(park?.latitude);
+            const parkLongitude = Number(park?.longitude);
+            return (
+              Number.isFinite(parkLatitude) && Number.isFinite(parkLongitude)
+            );
+          })
         : [];
 
       const greenAreas = await Promise.all(
@@ -108,7 +181,58 @@ class GreenSpaceService {
         }),
       );
 
-      const greenAreaIds = greenAreas.map((area) => area.id);
+      const uniqueGreenAreas = Array.from(
+        new Map(greenAreas.map((area) => [area.id, area])).values(),
+      );
+
+      const snapshot = await getOrCreateLatestSnapshot(locationQuery.id);
+
+      const accessRows = uniqueGreenAreas.map((area) => {
+        const distanceKm = distanceInKm(
+          latitude,
+          longitude,
+          area.latitude,
+          area.longitude,
+        );
+
+        const accessibilityScore = accessibilityScoreByDistance(
+          distanceKm,
+          radius,
+        );
+
+        return {
+          snapshotId: snapshot.id,
+          greenAreaId: area.id,
+          distanceKm: Number(distanceKm.toFixed(3)),
+          accessibilityScore,
+        };
+      });
+
+      await prisma.$transaction(async (tx) => {
+        await tx.greenAccessScore.deleteMany({
+          where: {
+            snapshotId: snapshot.id,
+          },
+        });
+
+        if (accessRows.length > 0) {
+          await tx.greenAccessScore.createMany({
+            data: accessRows,
+          });
+        }
+      });
+
+      const greenSpaceScore = aggregateGreenSpaceScore(
+        accessRows.map((row) => row.accessibilityScore),
+      );
+
+      await upsertScoreDetailAndUpdateSnapshot(snapshot.id, {
+        greenSpaceScore,
+      });
+
+      refreshEnvironmentCache(c.user.id);
+
+      const greenAreaIds = uniqueGreenAreas.map((area) => area.id);
 
       const groupedReviews = greenAreaIds.length
         ? await prisma.greenAreaReview.groupBy({
@@ -138,7 +262,7 @@ class GreenSpaceService {
         ]),
       );
 
-      const greenAreasWithStats = greenAreas.map((area) => ({
+      const greenAreasWithStats = uniqueGreenAreas.map((area) => ({
         ...area,
         averageRating: statsByArea.get(area.id)?.averageRating ?? 0,
         totalReviews: statsByArea.get(area.id)?.totalReviews ?? 0,

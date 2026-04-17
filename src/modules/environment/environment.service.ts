@@ -35,6 +35,8 @@ class EnvironmentService {
       orderBy: { snapshotTime: "desc" },
       include: {
         airQuality: true,
+        disasterRisk: true,
+        heatRisk: true,
         weatherCondition: true,
         noiseEstimation: true,
         scoreDetail: true,
