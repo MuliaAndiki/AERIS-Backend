@@ -229,6 +229,25 @@ export function isOlderThanRetention(date: Date, retentionDate: Date) {
   return date.getTime() < retentionDate.getTime();
 }
 
+// async function deleteUser() {
+//   const users = await prisma.user.findFirst({
+//     where: {
+//       isVerify: false,
+//     },
+//     select: {
+//       id: true,
+//     },
+//   });
+
+//   const deleteUser = await prisma.user.deleteMany({
+//     where: {
+//       id: users?.id,
+//     },
+//   });
+
+//   console.log(`useres delete isActive false ${deleteUser.count}`);
+// }
+
 async function cleanupOldSnapshots() {
   const retentionDate = computeRetentionDate(SNAPSHOT_RETENTION_DAYS);
 
@@ -332,6 +351,7 @@ async function cleanupOldSnapshots() {
 export function runSnapshotJob() {
   void refreshAllLocationCaches();
   void cleanupOldSnapshots();
+  // void deleteUser();
 
   setInterval(() => {
     void refreshAllLocationCaches();
@@ -340,6 +360,10 @@ export function runSnapshotJob() {
   setInterval(() => {
     void cleanupOldSnapshots();
   }, CLEANUP_JOB_INTERVAL_MS);
+
+  // setInterval(() => {
+  //   void deleteUser();
+  // }, CLEANUP_JOB_INTERVAL_MS);
 
   console.log(
     "[SnapshotJob] Scheduled every 3 hours and cleanup every 24 hours.",
