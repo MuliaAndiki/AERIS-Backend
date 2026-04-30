@@ -3,6 +3,7 @@ import { connectPrismaWithRetry } from "./config/prisma";
 import { env } from "./config/env";
 import { initSocket } from "./utils/socket";
 import { runSnapshotJob } from "./jobs/snapshot.job";
+import { getGroqChatCompletion } from "./script/model";
 const port = Number.isFinite(env.PORT) ? env.PORT : 5000;
 
 app.onStart(() => {
@@ -14,6 +15,7 @@ async function connected() {
     await connectPrismaWithRetry();
     await initSocket();
     runSnapshotJob();
+    getGroqChatCompletion();
 
     app.listen({
       port,

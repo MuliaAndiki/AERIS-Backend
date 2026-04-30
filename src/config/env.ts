@@ -17,6 +17,8 @@ const envSchema = z.object({
   SMTP_SECURE: z.preprocess((val) => val === "true", z.boolean()),
   SUPABASEPW: z.string(),
   API_NINJA: z.string(),
+  GROQ_SERVICE: z.string(),
+  GEOAPIFY: z.string(),
 });
 
 const _env = envSchema.safeParse(process.env);

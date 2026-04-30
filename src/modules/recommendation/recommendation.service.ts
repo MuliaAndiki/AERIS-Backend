@@ -24,7 +24,6 @@ class RecommendationService {
         return snapshot.recommendations.map(
           (item): RecommendationItem => ({
             id: item.id,
-            recommendationType: item.recommendationType,
             message: item.message,
             severity: item.severity,
           }),
@@ -65,7 +64,7 @@ class RecommendationService {
           },
           select: {
             id: true,
-            recommendationType: true,
+
             message: true,
             severity: true,
           },
@@ -100,7 +99,6 @@ class RecommendationService {
             const fallbackRecommendations = [
               {
                 id: "fallback-1",
-                recommendationType: "general",
                 message:
                   score > 70
                     ? "Good environmental conditions today. Great time for outdoor activities!"

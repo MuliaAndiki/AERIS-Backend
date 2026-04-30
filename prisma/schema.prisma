@@ -38,7 +38,7 @@ model UserSession {
   createdAt DateTime @default(now())
   expiresAt DateTime
   ipAddress String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("user_sessions")
@@ -55,7 +55,7 @@ model UserLocation {
   state     String
   radius    Int
   snapshots EnvironmentalSnapshot[]
-  user      User                    @relation(fields: [userId], references: [id])
+  user      User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_locations")
 }
@@ -67,10 +67,10 @@ model EnvironmentalSnapshot {
   environmentalScore Int
   airQuality         AirQuality?
   disasterRisk       DisasterRisk?
-  heatRisk           HeatRisk?
   scoreDetail        EnvironmentalScoreDetail?
-  location           UserLocation              @relation(fields: [locationId], references: [id])
+  location           UserLocation              @relation(fields: [locationId], references: [id], onDelete: Cascade)
   greenAccessScores  GreenAccessScore[]
+  heatRisk           HeatRisk?
   noiseEstimation    NoiseEstimation?
   recommendations    Recommendation[]
   weatherCondition   WeatherCondition?
@@ -78,14 +78,13 @@ model EnvironmentalSnapshot {
   @@map("environmental_snapshots")
 }
 
-
 model AirQuality {
   id                String                @id @default(uuid())
   snapshotId        String                @unique
   aqi               Int
   category          String
   dominantPollutant String
-  snapshot          EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+  snapshot          EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
 
   @@map("air_quality")
 }
@@ -96,7 +95,7 @@ model DisasterRisk {
   floodScore   Int
   heatScore    Int
   divisionCode String?
-  snapshot     EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+  snapshot     EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
 
   @@map("disaster_risks")
 }
@@ -107,7 +106,7 @@ model HeatRisk {
   feelsLike     Float
   heatRiskScore Int
   riskLevel     String
-  snapshot      EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+  snapshot      EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
 
   @@map("heat_risks")
 }
@@ -119,7 +118,7 @@ model WeatherCondition {
   humidity      Float
   rainfall      Float
   weatherStatus String
-  snapshot      EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+  snapshot      EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
 
   @@map("weather_conditions")
 }
@@ -129,7 +128,7 @@ model NoiseEstimation {
   snapshotId          String                @unique
   roadDensityIndex    Int
   estimatedNoiseLevel Int
-  snapshot            EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+  snapshot            EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
 
   @@map("noise_estimations")
 }
@@ -142,7 +141,7 @@ model EnvironmentalScoreDetail {
   floodRiskScore  Int
   noiseScore      Int
   greenSpaceScore Int
-  snapshot        EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+  snapshot        EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
 
   @@map("environmental_score_details")
 }
@@ -150,10 +149,9 @@ model EnvironmentalScoreDetail {
 model Recommendation {
   id                 String                @id @default(uuid())
   snapshotId         String
-  recommendationType String
   message            String
   severity           Int
-  snapshot           EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+  snapshot           EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
 
   @@map("recommendations")
 }
@@ -177,7 +175,7 @@ model GreenAccessScore {
   distanceKm         Float
   accessibilityScore Int
   greenArea          GreenArea             @relation(fields: [greenAreaId], references: [id])
-  snapshot           EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id])
+  snapshot           EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
 
   @@map("green_access_scores")
 }
@@ -194,7 +192,7 @@ model GreenAreaReview {
   isHidden    Boolean   @default(false)
   updatedAt   DateTime  @updatedAt
   greenArea   GreenArea @relation(fields: [greenAreaId], references: [id])
-  user        User      @relation(fields: [userId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("green_review")
 }
