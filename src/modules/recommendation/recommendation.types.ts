@@ -1,6 +1,5 @@
 export interface RecommendationItem {
   id: string;
-  recommendationType: string;
   message: string;
   severity: number;
 }

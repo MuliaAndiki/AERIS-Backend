@@ -1,11 +1,15 @@
 import prisma from "prisma/client";
 import { MODULE_CACHE_TTL } from "@/modules/cache/cache-policy";
 import { moduleCache } from "@/modules/cache/module-cache";
+import { client } from "@/utils/client";
 
 class SnapshotService {
-  /**
-   * Generate contextual recommendations based on environmental scores
-   */
+  //initiial groc generate message
+  private client;
+  constructor() {
+    this.client = client;
+  }
+
   private generateRecommendations(
     airQualityScore: number,
     heatRiskScore: number,
@@ -19,14 +23,12 @@ class SnapshotService {
     // Air Quality Recommendations
     if (airQualityScore < 40) {
       recommendations.push({
-        recommendationType: "health",
         message:
           "Air quality is poor. Consider staying indoors and wearing an N95 mask if you go outside.",
         severity: 3, // High severity
       });
     } else if (airQualityScore < 60) {
       recommendations.push({
-        recommendationType: "health",
         message:
           "Air quality is moderate. Sensitive groups should limit outdoor activities.",
         severity: 2, // Medium
@@ -36,14 +38,12 @@ class SnapshotService {
     // Heat Risk Recommendations
     if (heatRiskScore > 70) {
       recommendations.push({
-        recommendationType: "safety",
         message:
           "High heat risk detected. Stay hydrated, wear light clothing, and avoid strenuous activities.",
         severity: 3, // High
       });
     } else if (heatRiskScore > 50) {
       recommendations.push({
-        recommendationType: "safety",
         message:
           "Moderate heat today. Remember to drink plenty of water and use sunscreen.",
         severity: 2, // Medium
@@ -53,14 +53,12 @@ class SnapshotService {
     // Flood Risk Recommendations
     if (floodRiskScore > 70) {
       recommendations.push({
-        recommendationType: "warning",
         message:
           "High flood risk in this area. Avoid flooded areas and have an emergency plan ready.",
         severity: 3, // High
       });
     } else if (floodRiskScore > 50) {
       recommendations.push({
-        recommendationType: "awareness",
         message: "Elevated flood risk. Stay alert and avoid low-lying areas.",
         severity: 2, // Medium
       });
@@ -69,7 +67,6 @@ class SnapshotService {
     // Noise Recommendations
     if (noiseScore > 70) {
       recommendations.push({
-        recommendationType: "health",
         message:
           "High noise levels detected. Use noise-cancelling headphones or earplugs if sensitive to noise.",
         severity: 2, // Medium
@@ -79,7 +76,6 @@ class SnapshotService {
     // Green Space Recommendations
     if (greenSpaceScore < 40) {
       recommendations.push({
-        recommendationType: "wellness",
         message:
           "Limited green spaces nearby. Consider taking a short trip to a park for better air quality and mental health.",
         severity: 1, // Low
@@ -89,21 +85,18 @@ class SnapshotService {
     // Overall Environmental Score Recommendations
     if (environmentalScore < 45) {
       recommendations.push({
-        recommendationType: "general",
         message:
           "Overall environmental conditions are poor today. Plan activities accordingly and protect yourself.",
         severity: 3, // High
       });
     } else if (environmentalScore < 70) {
       recommendations.push({
-        recommendationType: "general",
         message:
           "Environmental conditions are moderate. Monitor changes throughout the day.",
         severity: 2, // Medium
       });
     } else {
       recommendations.push({
-        recommendationType: "general",
         message:
           "Good environmental conditions today. Great time for outdoor activities!",
         severity: 1, // Low
