@@ -146,6 +146,39 @@ class LocationService {
     return created;
   }
 
+  public async reverseGeocode(lat: number, lon: number) {
+    try {
+      const response = await axios.get(
+        "https://nominatim.openstreetmap.org/reverse",
+        {
+          params: {
+            lat,
+            lon,
+            format: "json",
+            zoom: 10,
+          },
+          headers: {
+            "User-Agent": "AERIS-App",
+          },
+        },
+      );
+
+      const addr = response.data?.address;
+      return {
+        city: addr?.city || addr?.town || addr?.village || addr?.suburb || "Unknown City",
+        state: addr?.state || addr?.region || "",
+        country: addr?.country || "Unknown Country",
+      };
+    } catch (error) {
+      console.error("Reverse geocoding error:", error);
+      return {
+        city: "Unknown City",
+        state: "",
+        country: "Unknown Country",
+      };
+    }
+  }
+
   private toNumber(value?: string): number | null {
     if (!value) return null;
     const converted = Number(value);

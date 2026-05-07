@@ -72,6 +72,22 @@ class LocationRoutes {
         },
       },
     );
+
+    this.router.get(
+      "/reverse",
+      (c: AppContext) => locationController.reverse(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+        query: t.Object({
+          latitude: t.String(),
+          longitude: t.String(),
+        }),
+        detail: {
+          tags: ["Location"],
+          summary: "Reverse geocode coordinates into address information",
+        },
+      },
+    );
   }
 }
 
