@@ -38,6 +38,18 @@ class LocationController {
       return ErrorHandling(c, error);
     }
   }
+
+  public async reverse(c: AppContext) {
+    try {
+      const query = (c.query ?? {}) as { latitude?: string; longitude?: string };
+      const lat = parseFloat(query.latitude || "0");
+      const lon = parseFloat(query.longitude || "0");
+      const data = await locationService.reverseGeocode(lat, lon);
+      return HttpResponse(c).ok(data, "Location reverse geocoded");
+    } catch (error) {
+      return ErrorHandling(c, error);
+    }
+  }
 }
 
 export default new LocationController();
