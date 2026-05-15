@@ -6,9 +6,11 @@ import snapshotRoute from "@/modules/snapshot/snapshot.route";
 import scoreRoute from "@/modules/scoring/score.route";
 import recommendationRoute from "@/modules/recommendation/recommendation.route";
 import insightRoute from "@/modules/insight/insight.route";
+import userRoute from "@/modules/user/user.route";
 
 export default new Elysia()
   .use(authRoutes)
+  .use(userRoute)
   .use(locationRoutes)
   .use(environmentRoutes)
   .use(snapshotRoute)
