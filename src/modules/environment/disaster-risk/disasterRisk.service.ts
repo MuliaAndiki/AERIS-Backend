@@ -155,6 +155,8 @@ class DisasterRiskService {
       refreshEnvironmentCache(c.user.id);
 
       return HttpResponse(c).ok({
+        latitude,
+        longitude,
         floodScore,
         heatScore,
         divisionCode,

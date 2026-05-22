@@ -145,6 +145,8 @@ class NoiseService {
       moduleCache.deleteByPrefix(`score:${c.user.id}:`);
 
       return HttpResponse(c).ok({
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
         state: userLocation.state,
         city: userLocation.city,
         country: userLocation.country,

@@ -1,5 +1,4 @@
 import { AppContext } from "@/context/appContext";
-import { ErrorHandling, HttpResponse } from "@/context/error";
 import { AxiosEnvironment } from "@/utils/axios";
 
 class GreenSpaceProvider {
@@ -9,47 +8,29 @@ class GreenSpaceProvider {
     radius: number,
     c: AppContext,
   ) {
-    const overpassQuery = `
-    [out:json];
-    (
-      node["leisure"="park"](around:${radius},${lat},${lon});
-      way["leisure"="park"](around:${radius},${lat},${lon});
-      node["leisure"="pitch"](around:${radius},${lat},${lon});
-      way["leisure"="pitch"](around:${radius},${lat},${lon});
-    );
-    out center;
-  `;
     try {
-      const { greenSpace } = AxiosEnvironment({ lat, lon });
+      const { greenSpace } = AxiosEnvironment({ lat, lon, radius });
 
-      const response = await greenSpace.post(
-        "/interpreter",
-        `data=${encodeURIComponent(overpassQuery)}`,
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        },
-      );
+      const response = await greenSpace.get("");
 
       if (!response || !response.data) {
         console.warn(
-          `[GreenSpace] No response data from Overpass API at lat:${lat}, lon:${lon}`,
+          `[GreenSpace] No response data from Geoapify API at lat:${lat}, lon:${lon}`,
         );
         return { parkData: [] };
       }
-      const element = response.data.elements || [];
+
+      const element = response.data.features || [];
 
       const parkData = element.map((el: any) => {
-        return {
-          name:
-            el.tags?.name ||
-            (el.tags?.leisure === "pitch"
-              ? "Lapangan Olahraga"
-              : "Taman Tanpa Nama"),
+        const coordinates = el.geometry?.coordinates || [];
+        const properties = el.properties || {};
 
-          latitude: el.lat || el.center?.lat,
-          longitude: el.lon || el.center?.lon,
+        return {
+          name: properties.name || "Taman Tanpa Nama",
+
+          latitude: properties.lat ?? coordinates[1],
+          longitude: properties.lon ?? coordinates[0],
 
           areaSize: 0,
         };
@@ -57,7 +38,7 @@ class GreenSpaceProvider {
       return { parkData };
     } catch (error) {
       console.error(
-        `[GreenSpace] Error fetching from Overpass at (${lat}, ${lon}):`,
+        `[GreenSpace] Error fetching from Geoapify at (${lat}, ${lon}):`,
         error instanceof Error ? error.message : error,
       );
       return { parkData: [] };
