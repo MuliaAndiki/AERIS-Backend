@@ -5,6 +5,63 @@ import { client } from "@/utils/client";
 
 const LLM_COOLDOWN_MS = 5 * 60 * 60 * 1000; // 5 hours
 
+/** Shared relation shape for snapshot reads — limits greenArea columns. */
+const snapshotDetailInclude = {
+  airQuality: true,
+  disasterRisk: true,
+  heatRisk: true,
+  weatherCondition: true,
+  noiseEstimation: true,
+  scoreDetail: true,
+  recommendations: true,
+  greenAccessScores: {
+    include: {
+      greenArea: {
+        select: {
+          id: true,
+          name: true,
+          latitude: true,
+          longitude: true,
+          areaSize: true,
+        },
+      },
+    },
+  },
+} as const;
+
+/** Lean read for snapshot generation — only fields needed to clone metrics. */
+const snapshotSourceSelect = {
+  airQuality: {
+    select: { aqi: true, category: true, dominantPollutant: true },
+  },
+  disasterRisk: {
+    select: { floodScore: true, heatScore: true, divisionCode: true },
+  },
+  heatRisk: {
+    select: { feelsLike: true, heatRiskScore: true, riskLevel: true },
+  },
+  weatherCondition: {
+    select: {
+      temperature: true,
+      humidity: true,
+      rainfall: true,
+      weatherStatus: true,
+    },
+  },
+  noiseEstimation: {
+    select: { roadDensityIndex: true, estimatedNoiseLevel: true },
+  },
+  scoreDetail: {
+    select: {
+      airQualityScore: true,
+      heatRiskScore: true,
+      floodRiskScore: true,
+      noiseScore: true,
+      greenSpaceScore: true,
+    },
+  },
+} as const;
+
 class SnapshotService {
   private client;
   /** Track last LLM generation time per locationId to respect rate limits */
@@ -289,20 +346,7 @@ Format:
           orderBy: {
             snapshotTime: "desc",
           },
-          include: {
-            airQuality: true,
-            disasterRisk: true,
-            heatRisk: true,
-            weatherCondition: true,
-            noiseEstimation: true,
-            scoreDetail: true,
-            recommendations: true,
-            greenAccessScores: {
-              include: {
-                greenArea: true,
-              },
-            },
-          },
+          include: snapshotDetailInclude,
         });
 
         if (!current) {
@@ -368,20 +412,7 @@ Format:
               userId,
             },
           },
-          include: {
-            airQuality: true,
-            disasterRisk: true,
-            heatRisk: true,
-            weatherCondition: true,
-            noiseEstimation: true,
-            scoreDetail: true,
-            recommendations: true,
-            greenAccessScores: {
-              include: {
-                greenArea: true,
-              },
-            },
-          },
+          include: snapshotDetailInclude,
         });
 
         if (!snapshot) {
@@ -403,14 +434,7 @@ Format:
       orderBy: {
         snapshotTime: "desc",
       },
-      include: {
-        airQuality: true,
-        disasterRisk: true,
-        heatRisk: true,
-        weatherCondition: true,
-        noiseEstimation: true,
-        scoreDetail: true,
-      },
+      select: snapshotSourceSelect,
     });
 
     const airQualityScore = latest?.scoreDetail?.airQualityScore ?? 60;

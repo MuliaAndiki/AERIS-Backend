@@ -4,6 +4,7 @@ import prisma from "prisma/client";
 import MapProvider from "@/providers/map.provider";
 import { environmentCache } from "@/modules/environment/environment.cache";
 import { ENV_CACHE_TTL } from "@/modules/environment/environment.cache-policy";
+import { roundCoord } from "@/utils/cache-key";
 import {
   getOrCreateLatestSnapshot,
   refreshEnvironmentCache,
@@ -157,8 +158,8 @@ class AirQualityService {
       const cacheKey = [
         "air-quality",
         c.user.id,
-        latitude,
-        longitude,
+        roundCoord(latitude),
+        roundCoord(longitude),
         city,
         state,
         country,
