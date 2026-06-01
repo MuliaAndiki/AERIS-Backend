@@ -57,6 +57,8 @@ model UserLocation {
   snapshots EnvironmentalSnapshot[]
   user      User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([userId, createdAt])
   @@map("user_locations")
 }
 
@@ -75,6 +77,9 @@ model EnvironmentalSnapshot {
   recommendations    Recommendation[]
   weatherCondition   WeatherCondition?
 
+  @@index([locationId])
+  @@index([snapshotTime])
+  @@index([locationId, snapshotTime])
   @@map("environmental_snapshots")
 }
 
@@ -153,6 +158,8 @@ model Recommendation {
   severity           Int
   snapshot           EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
 
+  @@index([snapshotId])
+  @@index([snapshotId, severity])
   @@map("recommendations")
 }
 
@@ -177,6 +184,8 @@ model GreenAccessScore {
   greenArea          GreenArea             @relation(fields: [greenAreaId], references: [id])
   snapshot           EnvironmentalSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
 
+  @@index([snapshotId])
+  @@index([greenAreaId])
   @@map("green_access_scores")
 }
 
@@ -194,6 +203,9 @@ model GreenAreaReview {
   greenArea   GreenArea @relation(fields: [greenAreaId], references: [id])
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([greenAreaId])
+  @@index([userId])
+  @@index([greenAreaId, isHidden, isFlagged])
   @@map("green_review")
 }
 
