@@ -5,6 +5,30 @@ interface CacheEntry<T> {
 
 class EnvironmentCache {
   private readonly store = new Map<string, CacheEntry<unknown>>();
+  private cleanupInterval: Timer | null = null;
+
+  constructor() {
+    this.startCleanup();
+  }
+
+  private startCleanup() {
+    // Cleanup every 5 minutes
+    this.cleanupInterval = setInterval(() => {
+      const now = Date.now();
+      let removed = 0;
+
+      for (const [key, entry] of this.store.entries()) {
+        if (now > entry.expiresAt) {
+          this.store.delete(key);
+          removed++;
+        }
+      }
+
+      if (removed > 0) {
+        console.log(`[EnvironmentCache] Cleaned up ${removed} expired entries`);
+      }
+    }, 5 * 60 * 1000);
+  }
 
   get<T>(key: string): T | null {
     const entry = this.store.get(key);
@@ -38,6 +62,32 @@ class EnvironmentCache {
 
     return producer().then((result) => this.set(key, result, ttlMs));
   }
+
+  destroy() {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+    }
+    this.store.clear();
+  }
+
+  getStats() {
+    return {
+      size: this.store.size,
+      entries: Array.from(this.store.entries()).map(([key, entry]) => ({
+        key,
+        expiresIn: Math.max(0, entry.expiresAt - Date.now()),
+      })),
+    };
+  }
 }
 
 export const environmentCache = new EnvironmentCache();
+
+// Cleanup on process exit
+process.on('SIGTERM', () => {
+  environmentCache.destroy();
+});
+
+process.on('SIGINT', () => {
+  environmentCache.destroy();
+});

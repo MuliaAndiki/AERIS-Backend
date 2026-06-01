@@ -5,6 +5,7 @@ import { environmentCache } from "@/modules/environment/environment.cache";
 import { ENV_CACHE_TTL } from "@/modules/environment/environment.cache-policy";
 import { hazardScoreMapping } from "@/types/hazard.type";
 import snapshotService from "@/modules/snapshot/snapshot.service";
+import { roundCoord } from "@/utils/cache-key";
 
 const SNAPSHOT_JOB_INTERVAL_MS = 3 * 60 * 60 * 1000; // 3 hours
 const CLEANUP_JOB_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -42,25 +43,26 @@ export async function refreshLocationCache(location: {
   const { id, userId, latitude, longitude, city, state, country, radius } =
     location;
 
+  const lat = roundCoord(latitude);
+  const lon = roundCoord(longitude);
+
   const airQualityKey = [
     "air-quality",
     userId,
-    latitude,
-    longitude,
+    lat,
+    lon,
     city,
     state,
     country,
   ].join(":");
-  const weatherKey = ["weather", userId, latitude, longitude].join(":");
+  const weatherKey = ["weather", userId, lat, lon].join(":");
   const disasterKey = ["disaster-risk", userId, city].join(":");
-  const noiseKey = ["noise-major-road-count", userId, latitude, longitude].join(
-    ":",
-  );
+  const noiseKey = ["noise-major-road-count", userId, lat, lon].join(":");
   const greenSpaceKey = [
     "green-space",
     userId,
-    latitude,
-    longitude,
+    lat,
+    lon,
     radius,
   ].join(":");
 
@@ -265,56 +267,14 @@ async function cleanupOldSnapshots() {
   if (staleSnapshots.length) {
     const snapshotIds = staleSnapshots.map((snapshot) => snapshot.id);
 
-    await prisma.$transaction([
-      prisma.airQuality.deleteMany({
-        where: {
-          snapshotId: { in: snapshotIds },
-        },
-      }),
-      prisma.weatherCondition.deleteMany({
-        where: {
-          snapshotId: { in: snapshotIds },
-        },
-      }),
-      prisma.disasterRisk.deleteMany({
-        where: {
-          snapshotId: { in: snapshotIds },
-        },
-      }),
-      prisma.heatRisk.deleteMany({
-        where: {
-          snapshotId: { in: snapshotIds },
-        },
-      }),
-      prisma.noiseEstimation.deleteMany({
-        where: {
-          snapshotId: { in: snapshotIds },
-        },
-      }),
-      prisma.environmentalScoreDetail.deleteMany({
-        where: {
-          snapshotId: { in: snapshotIds },
-        },
-      }),
-      prisma.recommendation.deleteMany({
-        where: {
-          snapshotId: { in: snapshotIds },
-        },
-      }),
-      prisma.greenAccessScore.deleteMany({
-        where: {
-          snapshotId: { in: snapshotIds },
-        },
-      }),
-      prisma.environmentalSnapshot.deleteMany({
-        where: {
-          id: { in: snapshotIds },
-        },
-      }),
-    ]);
+    const { count } = await prisma.environmentalSnapshot.deleteMany({
+      where: {
+        id: { in: snapshotIds },
+      },
+    });
 
     console.log(
-      `[SnapshotJob] Deleted ${snapshotIds.length} snapshot(s) older than ${SNAPSHOT_RETENTION_DAYS} days.`,
+      `[SnapshotJob] Deleted ${count} snapshot(s) older than ${SNAPSHOT_RETENTION_DAYS} days.`,
     );
   } else {
     console.log("[SnapshotJob] No old snapshots to delete.");
