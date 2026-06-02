@@ -69,9 +69,9 @@ class LocationService {
           const parts = displayName.split(",").map((p: string) => p.trim());
 
           // Extract city, state, country from display_name
-          let city = item.name || parts[0] || "";
+          const city = item.name || parts[0] || "";
           let state = item.state || "";
-          let country = item.country || "Indonesia";
+          const country = item.country || "Indonesia";
 
           // Parse display_name to get state
           if (parts.length >= 3) {
@@ -165,7 +165,12 @@ class LocationService {
 
       const addr = response.data?.address;
       return {
-        city: addr?.city || addr?.town || addr?.village || addr?.suburb || "Unknown City",
+        city:
+          addr?.city ||
+          addr?.town ||
+          addr?.village ||
+          addr?.suburb ||
+          "Unknown City",
         state: addr?.state || addr?.region || "",
         country: addr?.country || "Unknown Country",
       };

@@ -12,7 +12,7 @@ export const sendOTPEmail = async (to: string, otp: string) => {
     },
   });
 
-  const info = await transporter.sendMail({
+  await transporter.sendMail({
     from: `"AERIS" <${env.SMTP_USER}>`,
     to,
     subject: "Kode OTP Verifikasi Akun Anda",

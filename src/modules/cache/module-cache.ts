@@ -13,21 +13,24 @@ class ModuleCache {
 
   private startCleanup() {
     // Cleanup every 5 minutes
-    this.cleanupInterval = setInterval(() => {
-      const now = Date.now();
-      let removed = 0;
+    this.cleanupInterval = setInterval(
+      () => {
+        const now = Date.now();
+        let removed = 0;
 
-      for (const [key, entry] of this.store.entries()) {
-        if (now > entry.expiresAt) {
-          this.store.delete(key);
-          removed++;
+        for (const [key, entry] of this.store.entries()) {
+          if (now > entry.expiresAt) {
+            this.store.delete(key);
+            removed++;
+          }
         }
-      }
 
-      if (removed > 0) {
-        console.log(`[ModuleCache] Cleaned up ${removed} expired entries`);
-      }
-    }, 5 * 60 * 1000);
+        if (removed > 0) {
+          console.log(`[ModuleCache] Cleaned up ${removed} expired entries`);
+        }
+      },
+      5 * 60 * 1000,
+    );
   }
 
   get<T>(key: string): T | null {
@@ -97,10 +100,10 @@ class ModuleCache {
 export const moduleCache = new ModuleCache();
 
 // Cleanup on process exit
-process.on('SIGTERM', () => {
+process.on("SIGTERM", () => {
   moduleCache.destroy();
 });
 
-process.on('SIGINT', () => {
+process.on("SIGINT", () => {
   moduleCache.destroy();
 });

@@ -2,7 +2,7 @@ import { AppContext } from "@/context/appContext";
 import { AxiosEnvironment } from "@/utils/axios";
 
 class NoiseProvider {
-  public async getMajorRoadCount(lat: number, lon: number, c: AppContext) {
+  public async getMajorRoadCount(lat: number, lon: number, _c: AppContext) {
     const overpassQuery = `
     [out:json];
     (

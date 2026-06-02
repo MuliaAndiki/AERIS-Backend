@@ -2,7 +2,6 @@ import { AppContext } from "@/context/appContext";
 import { ErrorHandling, HttpResponse } from "@/context/error";
 import prisma from "prisma/client";
 import { safeUserSelect } from "@/utils/sanitizeUser";
-import bcryptjs from "bcryptjs";
 import { JwtPayload, PickUpdateProfile } from "@/modules/auth/auth.types";
 
 class UserController {
@@ -87,7 +86,9 @@ class UserController {
             },
           });
           if (existingUser) {
-            return HttpResponse(c).badRequest("Email is already in use by another account");
+            return HttpResponse(c).badRequest(
+              "Email is already in use by another account",
+            );
           }
           updateData.email = body.email.trim();
         }
@@ -102,7 +103,9 @@ class UserController {
             },
           });
           if (existingUser) {
-            return HttpResponse(c).badRequest("Phone number is already in use by another account");
+            return HttpResponse(c).badRequest(
+              "Phone number is already in use by another account",
+            );
           }
           updateData.phone = body.phone.trim();
         }
