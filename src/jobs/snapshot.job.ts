@@ -58,13 +58,7 @@ export async function refreshLocationCache(location: {
   const weatherKey = ["weather", userId, lat, lon].join(":");
   const disasterKey = ["disaster-risk", userId, city].join(":");
   const noiseKey = ["noise-major-road-count", userId, lat, lon].join(":");
-  const greenSpaceKey = [
-    "green-space",
-    userId,
-    lat,
-    lon,
-    radius,
-  ].join(":");
+  const greenSpaceKey = ["green-space", userId, lat, lon, radius].join(":");
 
   const tasks = [
     async () => {

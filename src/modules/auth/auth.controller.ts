@@ -15,7 +15,6 @@ import { AppContext } from "@/context/appContext";
 import { generateOtp } from "@/utils/generateOtp";
 import { sendOTPEmail } from "@/utils/sendEmail";
 // import { OAuth2Client } from "google-auth-library";
-import axios from "axios";
 import { sanitizeUser } from "@/utils/sanitizeUser";
 
 // const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);

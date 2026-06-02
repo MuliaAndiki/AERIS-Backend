@@ -6,7 +6,7 @@ class GreenSpaceProvider {
     lat: number,
     lon: number,
     radius: number,
-    c: AppContext,
+    _c: AppContext,
   ) {
     try {
       const { greenSpace } = AxiosEnvironment({ lat, lon, radius });
