@@ -13,21 +13,26 @@ class EnvironmentCache {
 
   private startCleanup() {
     // Cleanup every 5 minutes
-    this.cleanupInterval = setInterval(() => {
-      const now = Date.now();
-      let removed = 0;
+    this.cleanupInterval = setInterval(
+      () => {
+        const now = Date.now();
+        let removed = 0;
 
-      for (const [key, entry] of this.store.entries()) {
-        if (now > entry.expiresAt) {
-          this.store.delete(key);
-          removed++;
+        for (const [key, entry] of this.store.entries()) {
+          if (now > entry.expiresAt) {
+            this.store.delete(key);
+            removed++;
+          }
         }
-      }
 
-      if (removed > 0) {
-        console.log(`[EnvironmentCache] Cleaned up ${removed} expired entries`);
-      }
-    }, 5 * 60 * 1000);
+        if (removed > 0) {
+          console.log(
+            `[EnvironmentCache] Cleaned up ${removed} expired entries`,
+          );
+        }
+      },
+      5 * 60 * 1000,
+    );
   }
 
   get<T>(key: string): T | null {
@@ -84,10 +89,10 @@ class EnvironmentCache {
 export const environmentCache = new EnvironmentCache();
 
 // Cleanup on process exit
-process.on('SIGTERM', () => {
+process.on("SIGTERM", () => {
   environmentCache.destroy();
 });
 
-process.on('SIGINT', () => {
+process.on("SIGINT", () => {
   environmentCache.destroy();
 });

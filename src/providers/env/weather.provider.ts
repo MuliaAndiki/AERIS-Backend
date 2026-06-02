@@ -1,7 +1,7 @@
 import { AxiosEnvironment } from "@/utils/axios";
 import { AppContext } from "@/context/appContext";
 class WeatherProvider {
-  public async getWeather(lat: number, lon: number, c: AppContext) {
+  public async getWeather(lat: number, lon: number, _c: AppContext) {
     try {
       const { weather } = AxiosEnvironment({ lat, lon });
 

@@ -223,10 +223,16 @@ Format:
 
       const content = response.choices?.[0]?.message?.content?.trim();
       if (!content) {
-        console.warn("[SnapshotService] LLM returned empty content, using static fallback.");
+        console.warn(
+          "[SnapshotService] LLM returned empty content, using static fallback.",
+        );
         return this.generateStaticRecommendations(
-          airQualityScore, heatRiskScore, floodRiskScore,
-          noiseScore, greenSpaceScore, environmentalScore,
+          airQualityScore,
+          heatRiskScore,
+          floodRiskScore,
+          noiseScore,
+          greenSpaceScore,
+          environmentalScore,
         );
       }
 
@@ -239,10 +245,16 @@ Format:
           : [];
 
       if (items.length === 0) {
-        console.warn("[SnapshotService] LLM returned no recommendations, using static fallback.");
+        console.warn(
+          "[SnapshotService] LLM returned no recommendations, using static fallback.",
+        );
         return this.generateStaticRecommendations(
-          airQualityScore, heatRiskScore, floodRiskScore,
-          noiseScore, greenSpaceScore, environmentalScore,
+          airQualityScore,
+          heatRiskScore,
+          floodRiskScore,
+          noiseScore,
+          greenSpaceScore,
+          environmentalScore,
         );
       }
 
@@ -261,10 +273,16 @@ Format:
         .slice(0, 5);
 
       if (validated.length === 0) {
-        console.warn("[SnapshotService] LLM recommendations failed validation, using static fallback.");
+        console.warn(
+          "[SnapshotService] LLM recommendations failed validation, using static fallback.",
+        );
         return this.generateStaticRecommendations(
-          airQualityScore, heatRiskScore, floodRiskScore,
-          noiseScore, greenSpaceScore, environmentalScore,
+          airQualityScore,
+          heatRiskScore,
+          floodRiskScore,
+          noiseScore,
+          greenSpaceScore,
+          environmentalScore,
         );
       }
 
@@ -278,8 +296,12 @@ Format:
         error instanceof Error ? error.message : error,
       );
       return this.generateStaticRecommendations(
-        airQualityScore, heatRiskScore, floodRiskScore,
-        noiseScore, greenSpaceScore, environmentalScore,
+        airQualityScore,
+        heatRiskScore,
+        floodRiskScore,
+        noiseScore,
+        greenSpaceScore,
+        environmentalScore,
       );
     }
   }
@@ -313,15 +335,23 @@ Format:
         `[SnapshotService] LLM cooldown active for location ${locationId}. ${remainingMinutes} min remaining. Using static recommendations.`,
       );
       return this.generateStaticRecommendations(
-        airQualityScore, heatRiskScore, floodRiskScore,
-        noiseScore, greenSpaceScore, environmentalScore,
+        airQualityScore,
+        heatRiskScore,
+        floodRiskScore,
+        noiseScore,
+        greenSpaceScore,
+        environmentalScore,
       );
     }
 
     // Use LLM and update cooldown timestamp
     const recommendations = await this.generateLlmRecommendations(
-      airQualityScore, heatRiskScore, floodRiskScore,
-      noiseScore, greenSpaceScore, environmentalScore,
+      airQualityScore,
+      heatRiskScore,
+      floodRiskScore,
+      noiseScore,
+      greenSpaceScore,
+      environmentalScore,
       weatherData,
     );
 
@@ -517,7 +547,8 @@ Format:
             {
               temperature: latest?.weatherCondition?.temperature ?? undefined,
               humidity: latest?.weatherCondition?.humidity ?? undefined,
-              weatherStatus: latest?.weatherCondition?.weatherStatus ?? undefined,
+              weatherStatus:
+                latest?.weatherCondition?.weatherStatus ?? undefined,
             },
           ),
         },

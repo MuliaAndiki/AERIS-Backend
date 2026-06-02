@@ -1,4 +1,4 @@
-const weatherMapping = {
+export const weatherMapping = {
   0: "Cerah",
   1: "Cerah Berawan",
   2: "Berawan",

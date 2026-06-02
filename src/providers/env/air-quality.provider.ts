@@ -8,7 +8,7 @@ class AirQualityProvider {
     city: string,
     state: string,
     country: string,
-    c: AppContext,
+    _c: AppContext,
   ) {
     try {
       // Validate parameters - if any are empty/null, prioritize coordinates

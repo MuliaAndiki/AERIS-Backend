@@ -41,7 +41,10 @@ class LocationController {
 
   public async reverse(c: AppContext) {
     try {
-      const query = (c.query ?? {}) as { latitude?: string; longitude?: string };
+      const query = (c.query ?? {}) as {
+        latitude?: string;
+        longitude?: string;
+      };
       const lat = parseFloat(query.latitude || "0");
       const lon = parseFloat(query.longitude || "0");
       const data = await locationService.reverseGeocode(lat, lon);

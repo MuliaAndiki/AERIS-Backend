@@ -20,17 +20,13 @@ class UserRoutes {
   }
 
   private routes() {
-    this.router.get(
-      "/me",
-      (c: AppContext) => userController.getMe(c),
-      {
-        beforeHandle: [verifyToken().beforeHandle],
-        detail: {
-          tags: ["User"],
-          summary: "Get current user profile",
-        },
+    this.router.get("/me", (c: AppContext) => userController.getMe(c), {
+      beforeHandle: [verifyToken().beforeHandle],
+      detail: {
+        tags: ["User"],
+        summary: "Get current user profile",
       },
-    );
+    });
 
     this.router.put(
       "/edit-profile",
